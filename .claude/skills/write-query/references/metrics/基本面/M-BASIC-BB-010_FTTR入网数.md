@@ -26,15 +26,23 @@ source_file: "宽带.md"
 
 ## 业务口径
 
-(未填写)
+FTTR 入网数从 FTTR 清单取数，按统计月份和创建日期限定，常用统计对象为设备序列号 `eqpt_sn`。
+
+过滤口径：
+
+- `par_month_id = ${month_id}`
+- `create_date between ${start_day} and ${end_day}`，或 `substr(create_date,1,6)=par_month_id`
+- 分局/县分按 `subst_name` 过滤
 
 ## 技术口径（SQL）
 
 ```sql
-SELECT count(eqpt_sn)
-FROM view_dwm_fttr_list
-WHERE  par_month_id='202309'
-AND substr(create_date,1,6)=par_month_id
+SELECT COUNT(DISTINCT eqpt_sn) AS fttr_new_cnt
+FROM dwm_fttr_list
+WHERE par_month_id = ${month_id}
+  AND create_date >= '${start_day}'
+  AND create_date <= '${end_day}'
+;
 ```
 
 ## 参数化建议
@@ -44,4 +52,5 @@ AND substr(create_date,1,6)=par_month_id
 
 ## 依赖说明
 
-- 相关表请通过 `metric_table_map.md` 与 `metric_bridge.md` 映射到 A 层表文档。
+- 相关主表：`../../tables/002_fttr清单.md`。
+- 来源沉淀：`CDAP自助分析常用统计语句分享.docx` 的 FTTR 揽装脚本。

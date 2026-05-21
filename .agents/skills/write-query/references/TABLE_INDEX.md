@@ -54,7 +54,7 @@
 | 010 | 降档原始清单 | ads_yz_sunshou_acc_list | ads_yz_sunshou_acc_list | tables/010_降档原始清单.md |  |  | 降档原始清单相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
 | 011 | 降档动作订单清单 | ads_yz_sunshou_qudao | ads_yz_sunshou_qudao | tables/011_降档动作订单清单.md |  |  | 降档动作订单清单相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
 | 012 | 发展存量积分清单 | ads_yz_score_all_list | ads_yz_score_all_list | tables/012_发展存量积分清单.md |  | par_month_id | 发展存量积分清单相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
-| 013 | 全业务资料表 | ads_yz_tb_comm_cm_all_final | ads_yz_tb_comm_cm_all_final | tables/013_全业务资料表.md |  | par_month_id | 全业务资料表相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
+| 013 | 全业务资料表 | ads_yz_tb_comm_cm_all_final | dwm_yz_tb_comm_cm_all_final；dwm_yz_tb_comm_cm_all_mon_final | tables/013_全业务资料表.md | 以 serv_id 为服务粒度；账期/统计月份一般为 par_month_id | par_month_id | 全业务资料表相关取数；近半年账期优先日表 `dwm_yz_tb_comm_cm_all_final`，更早历史账期走月表 `dwm_yz_tb_comm_cm_all_mon_final`，重叠账期默认优先日表 | 字段名相似但业务事实不在本表时不要选 |
 | 014 | 优惠资料表 | ads_yz_rpt_comm_cm_msdisc_final | ads_yz_rpt_comm_cm_msdisc_final | tables/014_优惠资料表.md |  | par_month_id | 优惠资料表相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
 | 015 | 字典表视图 | dws_crm_cfguse.dws_attr_value | dws_crm_cfguse.dws_attr_value | tables/015_字典表视图.md |  |  | 字典表视图相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
 | 016 | 字典维表视图 | dws_crm_cfguse.dws_attr_SPEC | dws_crm_cfguse.dws_attr_SPEC | tables/016_字典维表视图.md |  |  | 字典维表视图相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
@@ -63,6 +63,7 @@
 | 019 | 移动主套餐维表视图 | metadata_ods_day.tb_dim_cdma_disc_type | metadata_ods_day.tb_dim_cdma_disc_type | tables/019_移动主套餐维表视图.md |  |  | 移动主套餐维表视图相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
 | 020 | 销售品维表视图 | dws_crm_cfguse.dws_offer | dws_crm_cfguse.dws_offer | tables/020_销售品维表视图.md |  |  | 销售品维表视图相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
 | 021 | 揽装网点维表 | zone_gz_yz.dwd_yz_sales_man_outlers_final | zone_gz_yz.dwd_yz_sales_man_outlers_final | tables/021_揽装网点维表.md |  |  | 揽装网点维表相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
+| 079 | 地址维表 | zone_gz_yz.dwd_yz_addr_final | zone_gz_yz.dwd_yz_addr_final | tables/079_地址维表.md | 以 id 为地址粒度；grade 表示地址层级 |  | 地址 / 装机地址相关取数；主业务表取 `serv_addr_id` 后按 `CAST(serv_addr_id AS DECIMAL(24,0)) = id` 关联，装机地址默认 `grade=10` | 字段名相似但业务事实不在本表时不要选 |
 | 022 | 商企入网清单 | zone_gz_yz.ads_yz_shangqi_rw_list | zone_gz_yz.ads_yz_shangqi_rw_list | tables/022_商企入网清单.md |  | par_month_id | 商企入网清单相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
 | 023 | 基础业务托收清单 | zone_gz_yz.ads_yz_tb_cl_tuoshou_list | zone_gz_yz.ads_yz_tb_cl_tuoshou_list | tables/023_基础业务托收清单.md |  | par_month_id | 基础业务托收清单相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
 | 024 | 营业厅月度订单受理量清单 | zone_gz_yz.ads_yz_yyt_sl_list | zone_gz_yz.ads_yz_yyt_sl_list | tables/024_营业厅月度订单受理量清单.md |  |  | 营业厅月度订单受理量清单相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
@@ -84,7 +85,7 @@
 | 042 | 号码协销表 | zone_gz_yz.dwd_yz_cm_obj_xx_final | zone_gz_yz.dwd_yz_cm_obj_xx_final | tables/042_号码协销表.md |  |  | 号码协销表相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
 | 043 | 订单协销表 | zone_gz_yz.dwd_yz_ba_obj_xx_final | zone_gz_yz.dwd_yz_ba_obj_xx_final | tables/043_订单协销表.md |  |  | 订单协销表相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
 | 047 | 最终版划小收入 | dwm_srhx_serv_list_mon | dwm_srhx_serv_list_mon | tables/047_最终版划小收入.md |  |  | 最终版划小收入相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
-| 048 | 全量科目级收入 | dwm_srhx_src_income_list_mon | dwm_srhx_src_income_list_mon | tables/048_全量科目级收入.md |  |  | 全量科目级收入相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
+| 048 | 全量科目级收入 | dwm_srhx_src_income_list_mon | dwm_srhx_src_income_list_mon | tables/048_全量科目级收入.md | 服务/号码级科目收入明细 | par_month_id | 全量科目级收入、按 SR 科目/due_income_code 取税后收入 sum(fee_all) | 字段名相似但业务事实不在本表时不要选；划小收入汇总用 047 |
 | 049 | 欠费日清单 | ads_ys_lst_qf_pushdata_daily_bss | ads_ys_lst_qf_pushdata_daily_bss | tables/049_欠费日清单.md |  |  | 欠费日清单相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
 | 050 | 宽带到达套餐收入清单 | zone_gz_yz.ads_yz_kddd_tcsr_list | zone_gz_yz.ads_yz_kddd_tcsr_list | tables/050_宽带到达套餐收入清单.md |  | par_month_id | 宽带到达套餐收入清单相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
 | 051 | 小业务收入多维表 | zone_gz_yz.ads_yz_ict_all_ydxyw_sr_LIST | zone_gz_yz.ads_yz_ict_all_ydxyw_sr_LIST | tables/051_小业务收入多维表.md |  | par_month_id | 小业务收入多维表相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |

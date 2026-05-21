@@ -26,7 +26,7 @@ source_file: "收入.md"
 
 ## 业务口径
 
-(未填写)
+划小收入来自最终版划小收入或收入生产视图，常用 `sum(a0)` 统计税后收入；分营服/包区明细可同时输出 `branch_id`、`branch_name`、`area_id`、`area_name`、`region_type`、`prod_id`、`prod_name`、`due_type`。
 
 ## 技术口径（SQL）
 
@@ -45,4 +45,4 @@ GROUP BY par_month_id
 
 ## 依赖说明
 
-- 相关表请通过 `metric_table_map.md` 与 `metric_bridge.md` 映射到 A 层表文档。
+- 相关表请通过 `../../METRIC_INDEX.md` 定位 A 层表文档；技术口径仍以本文件 SQL 为准。

@@ -26,7 +26,14 @@ source_file: "小业务.md"
 
 ## 业务口径
 
-(未填写)
+视联网入网数对标省 136 报表口径，来自视联网发展规模清单。月新增由天翼看家、天翼云眼、平安慧眼三部分组成。
+
+核心口径：
+
+- 天翼看家：`action_type='tykj_dd'`，且满足产品 ID、`attr_value like '%AI%'` 或 `offer_label='TYKJ-AI-202211'`。
+- 天翼云眼：`action_type='tyyy_dd'`，剔除 `offer_code='ZH0003-432-1-2'`，并扣减 `offer_label='TYYY-SPHJJM-202211'`。
+- 平安慧眼：`action_type='pahy_dd'`。
+- 入网统计需限定 `subs_stat_date` 日期范围；到达统计不加该日期范围。
 
 ## 技术口径（SQL）
 
@@ -52,4 +59,5 @@ source_file: "小业务.md"
 
 ## 依赖说明
 
-- 相关表请通过 `metric_table_map.md` 与 `metric_bridge.md` 映射到 A 层表文档。
+- 相关主表：`../../tables/057_视联网发展规模清单.md`。
+- 来源沉淀：`CDAP自助分析常用统计语句分享.docx` 的视联网发展规模清单 20250120 更新口径。

@@ -26,17 +26,18 @@ source_file: "移动.md"
 
 ## 业务口径
 
-(未填写)
+移动后付费单产品月入网从 069 全业务资料表取数，在移动月入网基础上限定 `yd_prod_type1='后付费单产品'`。
 
 ## 技术口径（SQL）
 
 ```sql
 SELECT count(serv_id) 
-FROM zone_gz.view_ads_yz_tb_comm_cm_all_final 
-WHERE par_month_id='202603'  --统计月份 
-AND is_new_user=1 
-AND prod_type=30 
-AND yd_prod_type1='后付费单产品'
+FROM dwm_yz_tb_comm_cm_all_final 
+WHERE par_month_id = ${month_id}
+  AND is_new_user = 1
+  AND date_format(open_date,'yyyyMM') = '${month_id}'
+  AND prod_type = 30
+  AND yd_prod_type1 = '后付费单产品'
 ;
 ```
 
@@ -47,4 +48,4 @@ AND yd_prod_type1='后付费单产品'
 
 ## 依赖说明
 
-- 相关表请通过 `metric_table_map.md` 与 `metric_bridge.md` 映射到 A 层表文档。
+- 相关主表：`../../tables/069_全业务资料表.md`。

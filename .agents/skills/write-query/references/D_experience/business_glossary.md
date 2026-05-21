@@ -17,16 +17,19 @@ title: "业务术语 → CDAP 概念 映射"
 |-------|---------|------------------------------|---------|---------|
 | 销售品 / offer | offer（销售品） | 041 优惠订单表（动作）；014 优惠资料表（存量） | `prod_offer_id` ↔ `dws_offer.offer_id` | `dws_offer` 维表 **必加 `city_id=200`**；销售品编码字段是 `prod_offer_code`，名称是 `offer_name` |
 | 揽装 / 揽装人 / 销售员 | 销售员 + 销售员所属机构 | 主表自带（041/040/022 等） | `sales_code`（揽装工号）、`sales_man_name`（揽装人姓名）；`salestaff_subst_id`（揽装分局）、`salestaff_branch_id`（揽装营服） | 机构维表 `dwd_yz_dim_org` 用 `org_id` 关联，**`levs=3`=分局、`levs=4`=营服** |
+| 营服 / 所属营服 | **划小营服**（默认，非揽装营服） | 048/047/069 等主表机构字段 | `branch_id`、`branch_name` | 未明确「揽装营服」时不用 `channel_branch_name`；041/069 揽装机构用 `salestaff_branch_id` 等 |
 | 划小局向 / 划小分局 | 号码归属机构（落到划小） | 069 全业务资料表 / 040 / 041 等主表 | `subst_id`、`subst_name`、`branch_id`、`branch_name` | 资料表 `dwm_yz_tb_comm_cm_all_final` 按 `serv_id` 关联取名称 |
 | 落地局向 | 标准落地机构（不同于划小） | 主表 | `std_subst_id`、`std_subst_name`、`std_branch_id`、`std_branch_name` | 与划小不同，谨慎区分用户语义 |
 | 竣工 | 订单状态=竣工 | 任意带 `subs_stat` 的订单表 | `subs_stat='301200'` | **默认作为 `is_jg` 标记列输出，不进 WHERE**；过滤竣工与否要看用户意图 |
 | 撤单 / 作废 | 订单状态原因 | 任意带 `subs_stat_reason` 的订单表 | `subs_stat_reason IN ('1200','1300')` | **发展量统计必加 `COALESCE(subs_stat_reason,'-1') NOT IN ('1200','1300')` 排除** |
 | 发展量（销售品） | 订购 + 销售品互换 | 041 优惠订单表 | `action_id IN (1292, 6200)` | 1292=订购，6200=销售品互换；要排除撤单作废 |
-| 入网量 / 到达量（全业务口径） | 全业务新增/到达/在网/拆机规模 | **069 全业务资料表** `dwm_yz_tb_comm_cm_all_final` | `is_new_user`、`open_date`、`prod_type`、`kd_desc`、`is_cz`、`is_cancel_user`、`is_wl_cancel_user`、`rh_type_ykj`、`is_rh_ykj`、`rh_tc_value`、`prod_type2` | 当用户未限定专项清单，且口径是"全业务/全产品规模"，优先走 069；明细强依赖专项字段时再切专项表 |
+| 入网量 / 到达量（全业务口径） | 全业务新增/到达/在网/拆机规模 | **069 全业务资料表** 日表 `dwm_yz_tb_comm_cm_all_final` / 月表 `dwm_yz_tb_comm_cm_all_mon_final` | `is_new_user`、`open_date`、`prod_type`、`kd_desc`、`is_cz`、`is_cancel_user`、`is_wl_cancel_user`、`rh_type_ykj`、`is_rh_ykj`、`rh_tc_value`、`prod_type2` | 当用户未限定专项清单，且口径是"全业务/全产品规模"，优先走 069；近半年账期优先日表，更早历史账期走月表，重叠账期默认优先日表；明细强依赖专项字段时再切专项表 |
 | 新装 | 新入网 | 060 移动新装清单 / 062 宽带新装 / 069 `is_new_user=1` | `is_new_user`、`subs_id`、`open_date` | 新装专项表 vs 资料表标志位选择，看用户要不要全字段 |
 | 续约 | 合约续约 | 081 移动续约 / 083 宽带续约 / 085/095 双线 | 看具体表 | 不同业务用不同续约表 |
 | 拆机 | 物理拆机 | 069 `is_wl_cancel_user=1` 或 086 主宽拆机挽留清单 | `wl_cancel_subs_stat_date`、`hist_create_date` | 物理拆机 ≠ 逻辑销户 |
 | 客户名 | 客户名称 | 041 / 022 直接 `cust_name`（不脱敏）；069 `cust_name_tm`（脱敏） | - | 业务范围决定取哪个；公众客群可能仅 069 有 |
+| 装机地址 / 接入号装机地址 / 地址信息 | 标准地址中文名 | 069 全业务资料表 + 079 地址维表 `zone_gz_yz.dwd_yz_addr_final` | `serv_addr_id` ↔ `dwd_yz_addr_final.id`；地址字段 `addr` | 装机地址默认从主业务表取 `serv_addr_id`，再按 `CAST(serv_addr_id AS DECIMAL(24,0)) = id` 关联地址维表；一般锁定 `grade=10`，需要脱敏时输出 `tm_addr_name` |
+| 双线 / 互联网专线 / 组网专线 | 专线类双线号码 | 069 全业务资料表；033 双线全量清单按需补月租 | `prod_type2 IN (60,70,71)`；`speed_value`；033 `yz_cs` | 60=互联网专线，70/71=组网专线；双线速率 069/033 均可取，主路径在 069 时优先取 069 `speed_value`，已补 033 时可取 033 `speed_value`；月租取 033 `yz_cs` |
 | 在网 / 在用 | 在网状态 | 069 `is_cancel_user=0` / `is_online_user=1` | - | 不同口径定义不同，必须看 metrics 字典 |
 | 出账 | 当月出账 | 069 `is_cz=1`（当月） / `is_cz_last=1`（上月） | - | 月维度判断 |
 | 融合 | 融合套餐 | 069 `rh_type_ykj` / `is_rh_ykj=1` | `rh_tc_id`、`rh_tc_value` | 严口径见 metrics |

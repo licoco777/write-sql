@@ -26,16 +26,24 @@ source_file: "移动.md"
 
 ## 业务口径
 
-(未填写)
+移动到达数从 069 全业务资料表取数，按账期状态统计当月出账移动号码。
+
+过滤口径：
+
+- `par_month_id = ${month_id}`
+- `is_cancel_user = 0`
+- `is_cz = 1`
+- `prod_type = 30`
 
 ## 技术口径（SQL）
 
 ```sql
 SELECT count(serv_id) 
-FROM zone_gz.view_ads_yz_tb_comm_cm_all_final 
-WHERE par_month_id='202603'   --统计月份
-AND is_cz=1 
-AND prod_type=30
+FROM dwm_yz_tb_comm_cm_all_final 
+WHERE par_month_id = ${month_id}
+  AND is_cancel_user = 0
+  AND is_cz = 1
+  AND prod_type = 30
 ;
 ```
 
@@ -46,4 +54,5 @@ AND prod_type=30
 
 ## 依赖说明
 
-- 相关表请通过 `metric_table_map.md` 与 `metric_bridge.md` 映射到 A 层表文档。
+- 相关主表：`../../tables/069_全业务资料表.md`。
+- 来源沉淀：`CDAP自助分析常用统计语句分享.docx` 的“统计移动到达数”脚本。

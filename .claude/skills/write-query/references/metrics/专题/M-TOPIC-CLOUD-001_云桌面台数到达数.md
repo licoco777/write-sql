@@ -52,4 +52,4 @@ AND branch_name='天河环五山政商营销服务中心'  ---划小营服
 
 ## 依赖说明
 
-- 相关表请通过 `metric_table_map.md` 与 `metric_bridge.md` 映射到 A 层表文档。
+- 相关表请通过 `../../METRIC_INDEX.md` 定位 A 层表文档；技术口径仍以本文件 SQL 为准。

@@ -26,7 +26,7 @@ source_file: "双线.md"
 
 ## 业务口径
 
-(未填写)
+双线净增月租来自双线全量清单，统计 `yz_cs-yz_cs_last`，覆盖入、拆、提、降、停、复等变化。
 
 ## 技术口径（SQL）
 
@@ -48,4 +48,4 @@ GROUP BY prod_desc,subst_name,branch_name
 
 ## 依赖说明
 
-- 相关表请通过 `metric_table_map.md` 与 `metric_bridge.md` 映射到 A 层表文档。
+- 相关表请通过 `../../METRIC_INDEX.md` 定位 A 层表文档；技术口径仍以本文件 SQL 为准。

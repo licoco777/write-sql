@@ -26,7 +26,7 @@ source_file: "收入.md"
 
 ## 业务口径
 
-(未填写)
+基本面收入来自收入生产视图，常用 `sum(fee_fm_new)`；按营服/包区/产品展开时可使用 `branch_id`、`branch_name`、`area_id`、`area_name`、`region_type`、`prod_id`、`prod_name`、`due_type`。
 
 ## 技术口径（SQL）
 
@@ -45,4 +45,4 @@ GROUP BY par_month_id
 
 ## 依赖说明
 
-- 相关表请通过 `metric_table_map.md` 与 `metric_bridge.md` 映射到 A 层表文档。
+- 相关表请通过 `../../METRIC_INDEX.md` 定位 A 层表文档；技术口径仍以本文件 SQL 为准。

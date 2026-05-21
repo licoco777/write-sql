@@ -4,7 +4,7 @@ metric_name: "主宽入网积分"
 domain: "基本面"
 category: "宽带"
 period: "日/月/年"
-cdap_flow: "宽带新装清单"
+cdap_flow: "全业务资料表（口径待补充）"
 owners:
   business: "谢蕴秀"
   technical: "陈浩南"
@@ -22,22 +22,15 @@ source_file: "宽带.md"
 | 统计周期 | 日/月/年 |
 | 业务口径责任人 | 谢蕴秀 |
 | 技术口径责任人 | 陈浩南 |
-| CDAP生产流程 | 宽带新装清单 |
+| CDAP生产流程 | 全业务资料表（口径待补充） |
 
 ## 业务口径
 
-(未填写)
+主宽入网积分改从 069 全业务资料表取数；具体过滤条件、时间字段、积分字段待用户补充。
 
 ## 技术口径（SQL）
 
-```sql
-SELECT sum(rh_tc_value) 
-FROM view_ads_yz_kd_new_list
-WHERE par_month_id =202603 AND kd_desc='普通宽带' 
-AND coalesce(prod_name, '-1') NOT LIKE '%专线%' AND coalesce(prod_name, '-1') NOT LIKE '%城域网%' --剔除专线宽带 
-AND coalesce(kd_prod_offer_name, '-1') NOT LIKE '%0时长%' --剔除快捷宽带主账号
-;
-```
+待补充。已确认主表改为 069 全业务资料表；不要继续使用旧口径 `view_ads_yz_kd_new_list`。
 
 ## 参数化建议
 
@@ -46,4 +39,5 @@ AND coalesce(kd_prod_offer_name, '-1') NOT LIKE '%0时长%' --剔除快捷宽带
 
 ## 依赖说明
 
-- 相关表请通过 `metric_table_map.md` 与 `metric_bridge.md` 映射到 A 层表文档。
+- 相关主表：`../../tables/069_全业务资料表.md`。
+- 技术口径待补充前，不要生成最终 SQL；应先向用户确认过滤条件、时间字段和积分字段。

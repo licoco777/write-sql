@@ -26,7 +26,7 @@ source_file: "积分.md"
 
 ## 业务口径
 
-(未填写)
+揽装价值积分来自揽装积分清单，统计 `jz_points`。
 
 ## 技术口径（SQL）
 
@@ -43,4 +43,4 @@ from view_ads_yz_lyf_lz where par_day_id=20260331
 
 ## 依赖说明
 
-- 相关表请通过 `metric_table_map.md` 与 `metric_bridge.md` 映射到 A 层表文档。
+- 相关表请通过 `../../METRIC_INDEX.md` 定位 A 层表文档；技术口径仍以本文件 SQL 为准。
