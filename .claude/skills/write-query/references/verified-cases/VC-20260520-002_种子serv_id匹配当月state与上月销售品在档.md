@@ -68,6 +68,7 @@ LEFT JOIN last_month_offer o ON s.serv_id = o.serv_id;
 
 ### 注意
 
+- **过程表可追溯**：若需求方要改中间结果（如上月销售品范围），将 `WITH last_month_offer` 改为 `drop/create tmp_*` CTAS 再 JOIN，见 `VC-20260520-001` 与 `RULES.md`「SQL 编排模式」。
 - 种子表驱动用 **LEFT JOIN**，保证清单内每个 `serv_id` 都有一行。
 - 014 一对多：务必子查询聚合后再 JOIN。
 - `serv_id` 类型不一致时对 JOIN 做 `cast`。

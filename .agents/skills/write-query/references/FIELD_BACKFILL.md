@@ -59,6 +59,8 @@ runtime: true
 | 客户名称 | `cust_name`、`cust_name_tm`、`cust_id` | 主表脱敏/不脱敏不满足时 | 客户表或 069 | 主表自带优先；跨表时按 `serv_id/cust_id` 谨慎关联 | 069 `cust_name_tm` 是脱敏名 |
 | 状态 / 动作含义 | `subs_stat`、`action_id`、`subs_stat_reason` | 需要解释或过滤码值 | `D_experience/dictionaries/{field}.md` | 不 JOIN，直接查码值后写 WHERE | WHERE 禁止中文状态 |
 | **服务状态 `state`（069）** | **`state`**（码值） | **输出状态字段或用户说「状态/号码状态」** | **`dws_crm_cfguse.dws_attr_value`**（`tables/015_字典表视图.md`） | `attr_id='4000000201'` AND `attr_value = cast(state as string)` → **`attr_value_name`** | **默认同时输出 `state` 码值与中文名**；勿用 `is_cancel_user` 等代替，除非用户明确要规模口径 |
+| **产品规格属性 / 特性值** | 主表通常无 | 用户要 `attr_id` 对应特性码值；历史/拆机前某月 | **105 特性资料表**（`tables/105_特性资料表.md`） | 月表 `iodata_ods_month_city.tb_pre_cm_attr_all_mon`：`serv_id` + `par_month_id` + `par_corp_id='200'` + `attr_id` | 历史必须用月表；日表 `tb_pre_cm_attr_all` 只在网 |
+| **特性值中文名** | `attr_value1`（码值） | 输出产品规格属性且要中文 | **`dws_crm_cfguse.dws_attr_value`** | `a.attr_id=b.attr_id` AND `a.attr_value1=b.attr_inner_value` AND `b.city_id='200'` → **`attr_value_name`** | 用 **`attr_inner_value`**，不是 `state` 的 `attr_value` |
 
 ## 补表确认输出模板
 
@@ -116,5 +118,15 @@ runtime: true
 - 主体编码、主体名称固定补 021 揽装网点维表，不全库搜索。
 - 优先用 `069.channel_nbr = 021.channel_nbr`；没有 `channel_nbr` 时再考虑 `channel_id`。
 - 补 021 前先按 `channel_nbr` 聚合出唯一 `own_operators_nbr`、`own_operators_name`，避免一网点多人员放大行数。
+
+### 种子 serv_id + 拆机前一月产品规格属性
+
+- 驱动表：用户种子表（含 `serv_id`；可无拆机月）。
+- 拆机月：069 **月表** `dwm_yz_tb_comm_cm_all_mon_final`，默认 **逻辑拆机** `is_cancel_user=1`；`cancel_month_id = par_month_id`（拆机标签仅拆机当月分区）；多次拆机默认取最近 `hist_create_date`。
+- 属性月：`attr_month_id = cancel_month_id - 1`。
+- 特性值：105 特性资料**月表**，`par_month_id=attr_month_id` + `par_corp_id='200'` + `attr_id IN (...)`。
+- 中文名：字典 `attr_value1 = attr_inner_value` + `city_id='200'`。
+- 多个 `attr_id` 默认 **宽表**（每 attr 两列：码值 + 中文）；全程 LEFT JOIN 保种子行。
+- 详见 `verified-cases/VC-20260522-001`。
 
 维护来源：精简自 `D_experience/field_backfill.md`。

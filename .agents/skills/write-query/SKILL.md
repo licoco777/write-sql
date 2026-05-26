@@ -1,6 +1,6 @@
 ---
 name: write-query
-description: 为 CDAP 电信业务数据分析平台编写、改写和审计 Hive SQL。Use when the user asks for CDAP 取数、指标口径、销售品/订单/收入/积分/续约/新装等业务查询、表路由、字段补全、码值过滤、Hive SQL 编写、SQL 优化或 SQL 口径审计。
+description: 为 CDAP 电信业务数据分析平台编写、改写和审计 Hive SQL。Use when the user asks for CDAP 取数、指标口径、销售品/订单/收入/积分/续约/新装等业务查询、表路由、字段补全、码值过滤、Hive SQL 编写、SQL 优化或 SQL 口径审计。DO NOT use for 非 CDAP 的 PostgreSQL/MySQL 通用查询、纯库表元数据查询（DESC/SHOW）、Excel 报表加工、数据可视化、ETL 任务调度配置。
 ---
 
 # write-query
@@ -21,8 +21,29 @@ description: 为 CDAP 电信业务数据分析平台编写、改写和审计 Hiv
 | Business Semantics / 口径确认 | `references/METRIC_INDEX.md` + 命中单指标文件；已锁主表的 `references/tables/*.md`；必要时 `references/verified-cases/INDEX.md` |
 | Column Linking / 字段映射 | 已锁主表的 `references/tables/*.md` |
 | Join Planning / 缺口补表 | `references/FIELD_BACKFILL.md`、补表对应的 `references/tables/*.md` |
-| SQL Generation + Review | `references/RULES.md`、相关 `references/D_experience/dictionaries/{field}.md` |
-| 维护回填 | 旧 D 层维护文件：`D_experience/table_routing.md`、`field_backfill.md`、`cdap_global_rules.md`、`anti_patterns.md`、`lessons_learned.md` |
+| SQL Generation + Review | `references/RULES.md`、相关 `references/D_experience/dictionaries/{field}.md`；复杂编排命中时读 `verified-cases/VC-20260520-001`（按 INDEX 相似度） |
+
+## 运行时禁读
+
+下列文件**不要在运行时加载**，仅历史溯源用：
+
+- `references/D_experience/_archive/*`：已归档的老经验层（`business_glossary`、`table_routing`、`cdap_global_rules`、`anti_patterns`、`field_backfill`）。内容已并入 `ROUTING.md` / `FIELD_BACKFILL.md` / `RULES.md`。
+- `references/D_experience/lessons_learned.md`：仅复盘日志，不参与运行时决策。
+- `references/verified-cases/*.md`（除 `INDEX.md` 外）：仅当用户需求与 `INDEX.md` 中某案例「适用」列高度匹配时再打开命中案例，不要批量预读。
+- 任何 `*-workspace/`：评测/迭代工作区，不属于运行时资产。
+
+## 路径选择（先判定）
+
+收到用户需求后，先判定走「轻量路径」还是「标准 6 步」。轻量路径下，第 2–5 步合并成一次「主表 + 口径 + 字段 + 补表」综合确认，再进第 6 步写 SQL。
+
+| 触发条件（任一） | 路径 | 步骤数 |
+|------------------|------|--------|
+| 命中标准指标 + 单主表 + 单账期 + 用户已给明确字段，且无外部维表 | **轻量路径** | 步骤 1 需求理解 → 步骤 2–5 合并确认（一次给「指标/主表/字段/补表」综合表）→ 步骤 6 SQL+审计 |
+| 用户已指定主表 + 输出字段都在该表，且无外部维表 | **轻量路径** | 同上 |
+| 多主表 / 外部维表 / 按年或按段编排 / 种子驱动 / 含 UNION / 口径不明 | **标准 6 步** | 完整 6 步分步确认 |
+| 用户明确说「直接给 SQL」「不要分步」且需求清楚 | **轻量路径** | 同上；SQL 头部 SQL 注释中标注主表、口径来源 |
+
+不确定时回退到标准 6 步。轻量路径不是「省略审计」——步骤 6 的审计仍要完整执行。
 
 ## 分步确认协议
 
@@ -35,7 +56,7 @@ description: 为 CDAP 电信业务数据分析平台编写、改写和审计 Hiv
 | 3 口径确认 | `业务口径确认` | 口径名称、技术条件、时间字段、码值、来源、待确认项 |
 | 4 字段映射 | `字段映射确认` | 需求字段、候选字段、来源表、是否满足、歧义 |
 | 5 补表规划 | `补表确认` | 缺口字段、补表、JOIN 键、粒度、必要过滤、行数风险 |
-| 6 SQL 审计 | `SQL + 审计确认` | SQL、字段来源、口径来源、审计通过项、风险项 |
+| 6 SQL 审计 | `SQL + 审计确认` | SQL、字段来源、口径来源、审计通过项、风险项；复杂场景另附过程表血缘 |
 
 阶段结论必须简洁；不要在确认阶段提前输出完整 SQL。
 
@@ -164,17 +185,35 @@ description: 为 CDAP 电信业务数据分析平台编写、改写和审计 Hiv
 
 ### 6. SQL Generation + Review
 
-用户确认主表、口径、字段映射、补表方案后再写 SQL。
+用户确认主表、口径、字段映射、补表方案后再写 SQL。先判定编排复杂度（见下表），再选对应形态；细则见 `references/RULES.md`「SQL 编排模式」。
 
-写 SQL：
+#### SQL 编排模式
 
-- 简单明细或汇总优先单 SELECT；复杂补表或复用逻辑用 CTE。
-- 不使用 `SELECT *`。
+| 模式 | 何时使用 | 交付形态 |
+|------|----------|----------|
+| **单 SELECT** | 单主表、单账期或连续账期、无分列维表、无多段 UNION、中间结果不需单独改 | 一条 `SELECT`（可含子查询，不建过程表） |
+| **CTAS 流水线（复杂默认）** | 满足任一：外部维表/配置导入；按年/按段不同 JOIN 键或过滤；多段 `UNION ALL`；种子表驱动打标；需求方可能逐步改中间结果 | 每步 `drop table if exists ... purge` + `create table ... as` + 验收 `select count(*)`；附过程表血缘表 |
+| **WITH（例外）** | 用户明确要求「不要建表」；或一次性探查且明确不迭代 | 须在交付中标注「无过程表，不可分段改」 |
+
+**复杂场景禁止**：用多层 `WITH` 代替本可落盘的过程表步骤（见 `RULES.md` 反模式）。
+
+标准模板：`verified-cases/VC-20260520-001`（按年分列维表 + UNION + 汇总）。
+
+写 SQL（各模式通用）：
+
+- 不使用 `SELECT *`（过程表 `select a.*` 仅当需保留主表全字段且用户已确认）。
 - 分区裁剪必须来自表文档 `partition_keys`。
 - 多对多 JOIN 要主动去重或说明行数风险。
 - Hive 局部排序用 `SORT BY`；谨慎使用全局 `ORDER BY`。
 - 统计用户数用 `COUNT(CASE WHEN 条件 THEN serv_id END)`。
 - 统计金额 / 积分用 `SUM(CASE WHEN 条件 THEN 字段 ELSE 0 END)`。
+- CTAS 流水线：过程表命名 `tmp_{项目缩写}_{步骤}_{账期或年}` → `tmp_..._union` → `ads_{项目缩写}_{结果}`；号码级临时表必须在某层 `group by 输出维度 + sum(度量)`。
+
+复杂场景交付前附 **过程表血缘**（必填）：
+
+| 步骤 | 表名 | 用途 | 上游 | 关键过滤 | 验收 SQL |
+|------|------|------|------|----------|----------|
+|  |  |  |  |  | `select count(*) from ...` |
 
 审计 SQL：
 
@@ -187,6 +226,7 @@ description: 为 CDAP 电信业务数据分析平台编写、改写和审计 Hiv
 - 状态 / 动作是否使用码值。
 - 是否还有中文占位符。
 - 明细和汇总是否混在同一行级结果里。
+- **复杂场景**：每步过程表是否可单独验收、是否误用 `WITH` 替代落盘。
 
 审计输出格式：
 
@@ -198,19 +238,21 @@ description: 为 CDAP 电信业务数据分析平台编写、改写和审计 Hiv
 | 时间/分区 | 通过/风险 |  |
 | JOIN 风险 | 通过/风险 |  |
 | 码值使用 | 通过/风险 |  |
+| 过程表可追溯 | 通过/风险/不适用 | 复杂 CTAS 必填；单 SELECT 标不适用 |
 | 可执行性 | 通过/风险 |  |
 
 ## 输出格式
 
 每个确认阶段使用短表格或短清单，最后交付包含：
 
-1. 完整 SQL。
+1. 完整 SQL（复杂场景为 CTAS 流水线多段脚本，非单条 `WITH`）。
 2. 主表、补表和关键字段说明。
 3. 需求字段与来源字段对照。
 4. 核心过滤和业务口径说明。
 5. 来源标注：指标文件、表文档、路由、字典、verified case 或假设。
 6. 性能说明：分区、JOIN 风险、数据量风险。
-7. 待确认项：只列真正会影响结果的事项。
+7. **复杂场景**：过程表血缘表（步骤、表名、用途、上游、过滤、验收 SQL）。
+8. 待确认项：只列真正会影响结果的事项。
 
 ## 冲突优先级
 
@@ -225,8 +267,10 @@ description: 为 CDAP 电信业务数据分析平台编写、改写和审计 Hiv
 
 任务结束后只回填会复用、会影响正确性的经验：
 
-- 新业务术语或选表经验：先补 `ROUTING.md`，必要时同步旧 `D_experience/table_routing.md` 或 `business_glossary.md`。
-- 新字段补表规则：补 `FIELD_BACKFILL.md`，必要时同步旧 `D_experience/field_backfill.md`。
-- 新硬规则或反模式：补 `RULES.md`，必要时同步旧 `D_experience/cdap_global_rules.md` 或 `anti_patterns.md`。
-- 新码值：补对应 `D_experience/dictionaries/{field}.md`。
-- 只作为复盘的内容放 `D_experience/lessons_learned.md`，不要运行时加载。
+- 新业务术语或选表经验：补 `references/ROUTING.md`（术语映射 / 主表路由表 / 术语→字段反查）。
+- 新字段补表规则：补 `references/FIELD_BACKFILL.md`。
+- 新硬规则或反模式：补 `references/RULES.md`（审计清单 / 专项审计项）。
+- 新码值：补对应 `references/D_experience/dictionaries/{field}.md`。
+- 新案例模板：在 `references/verified-cases/` 加 `VC-YYYYMMDD-NNN_<语义>.md`，并在 `verified-cases/INDEX.md` 加一行（注明「适用 / 不适用」）。
+- 只作为复盘的内容放 `references/D_experience/lessons_learned.md`，不要运行时加载。
+- **不要**回填到 `references/D_experience/_archive/`：那是已归档的老 D 层，不参与运行时。

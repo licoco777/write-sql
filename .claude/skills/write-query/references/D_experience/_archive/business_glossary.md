@@ -18,7 +18,7 @@ title: "业务术语 → CDAP 概念 映射"
 | 销售品 / offer | offer（销售品） | 041 优惠订单表（动作）；014 优惠资料表（存量） | `prod_offer_id` ↔ `dws_offer.offer_id` | `dws_offer` 维表 **必加 `city_id=200`**；销售品编码字段是 `prod_offer_code`，名称是 `offer_name` |
 | 揽装 / 揽装人 / 销售员 | 销售员 + 销售员所属机构 | 主表自带（041/040/022 等） | `sales_code`（揽装工号）、`sales_man_name`（揽装人姓名）；`salestaff_subst_id`（揽装分局）、`salestaff_branch_id`（揽装营服） | 机构维表 `dwd_yz_dim_org` 用 `org_id` 关联，**`levs=3`=分局、`levs=4`=营服** |
 | 营服 / 所属营服 | **划小营服**（默认，非揽装营服） | 048/047/069 等主表机构字段 | `branch_id`、`branch_name` | 未明确「揽装营服」时不用 `channel_branch_name`；041/069 揽装机构用 `salestaff_branch_id` 等 |
-| 状态 / 号码状态 / 用户状态 | 069 服务状态码 + 字典中文名 | 069 全业务资料表 | **`state`**；中文补 **`dws_crm_cfguse.dws_attr_value`**（`attr_id='4000000201'`，`attr_value_name`） | **用户说「状态」默认指 `state`**，交付 **必须含中文名**；不要默认改用 `is_cancel_user`/`is_online_user` unless 用户明确要规模口径 |
+| 状态 / 号码状态 / 用户状态 | 069 服务状态码 + 字典中文名 | 069 全业务资料表 | **`state`**；中文补 **`dws_crm_cfguse.dws_attr_value`**（`attr_id='4000000201'`，`attr_value_name`） | **用户说「状态」默认指 `state`**，交付 **必须含中文名**；不要默认改用 `is_cancel_user`/`is_online_user`  unless 用户明确要规模口径 |
 | 有没有某销售品 / 套餐 | 销售品资料在档 | 014 优惠资料表 | `serv_id` + `par_month_id` + `prod_offer_code` | 「有没有」≠ 041 订购动作；名称取 `prod_offer_name` |
 | 划小局向 / 划小分局 | 号码归属机构（落到划小） | 069 全业务资料表 / 040 / 041 等主表 | `subst_id`、`subst_name`、`branch_id`、`branch_name` | 资料表 `dwm_yz_tb_comm_cm_all_final` 按 `serv_id` 关联取名称 |
 | 落地局向 | 标准落地机构（不同于划小） | 主表 | `std_subst_id`、`std_subst_name`、`std_branch_id`、`std_branch_name` | 与划小不同，谨慎区分用户语义 |
