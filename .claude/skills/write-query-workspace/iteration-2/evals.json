@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "workspace": "iteration-1",
+  "skill": "write-query",
+  "skill_path": ".claude/skills/write-query/SKILL.md",
+  "purpose": "write-query 大手术前的 baseline——比较 with-skill / without-skill 在 6 个典型 CDAP 场景上的取数 SQL 质量。",
+  "grader": {
+    "type": "static_assert",
+    "engine": "scripts/grader.py",
+    "passing_threshold": 0.7,
+    "notes": "每个 assertion 命中即 1 分；命中率 >= passing_threshold 视为通过。"
+  },
+  "evals": [
+    {
+      "id": "eval-simple-metric",
+      "title": "简单标准指标——主宽到达数",
+      "tier": "simple",
+      "purpose": "验证轻量通道：命中标准指标 + 单主表 + 单账期 + 无补表，应一步给方案。",
+      "prompt": "取一下 202605 主宽到达数。",
+      "expected_path": "命中 M-BASIC-BB-003 标准指标，069 全业务资料表",
+      "assertions": [
+        {"id": "S1-table", "kind": "regex_match", "pattern": "(?i)\\bdwm_yz_tb_comm_cm_all_final\\b", "must": true, "desc": "使用 069 生产日表"},
+        {"id": "S1-not-old-prefix", "kind": "regex_not_match", "pattern": "(?i)\\bads_yz_tb_comm_cm_all_final\\b", "must": true, "desc": "禁用旧 ads_yz_tb_comm_cm_all_final 前缀"},
+        {"id": "S1-par-month", "kind": "regex_match", "pattern": "par_month_id\\s*=\\s*['\"]?202605['\"]?", "must": true, "desc": "分区裁剪到 202605"},
+        {"id": "S1-prod-type", "kind": "regex_match", "pattern": "prod_type\\s*=\\s*40\\b", "must": true, "desc": "主宽 prod_type=40"},
+        {"id": "S1-kd-desc", "kind": "regex_match", "pattern": "kd_desc\\s*=\\s*['\"]普通宽带['\"]", "must": true, "desc": "kd_desc='普通宽带'"},
+        {"id": "S1-is-cz", "kind": "regex_match", "pattern": "is_cz\\s*=\\s*1\\b", "must": true, "desc": "is_cz=1 标志到达"},
+        {"id": "S1-is-cancel", "kind": "regex_match", "pattern": "is_cancel_user\\s*=\\s*0\\b", "must": true, "desc": "未拆机过滤"},
+        {"id": "S1-no-zh-placeholder", "kind": "regex_not_match", "pattern": "'\\s*<[一-龥]+>\\s*'|<\\s*(?:待填|请补充|占位符|TBD)\\s*>|'[一-龥]+\\d+'|''[一-龥]+''", "must": true, "desc": "SQL 字面量禁尖括号/编号占位"},
+        {"id": "S1-no-select-star", "kind": "regex_not_match", "pattern": "(?im)^\\s*SELECT\\s+\\*", "must": true, "desc": "禁 SELECT *"}
+      ]
+    },
+    {
+      "id": "eval-complex-ctas",
+      "title": "复杂科目级税后收入按年分列汇总",
+      "tier": "complex",
+      "purpose": "验证 VC-20260520-001 模板触发：CTAS 流水线 + drop purge + UNION ALL + 多年分列。",
+      "prompt": "我有一份按年的科目维表 ads_yz_zqb_xc_due_income_code_dim_list，里面三列 due_income_code23 / due_income_code24 / due_income_code25。请帮我按年（23/24/25）从这个维表去匹配 SR 科目税后收入，最后按局向、营服、产权客户、产品、揽装人维度汇总确认收入（税后），最终落到一张 ads 表。",
+      "expected_path": "VC-20260520-001 CTAS 五步模板",
+      "assertions": [
+        {"id": "C1-main-table", "kind": "regex_match", "pattern": "(?i)\\bdwm_srhx_src_income_list_mon\\b", "must": true, "desc": "048 主表"},
+        {"id": "C1-ctas-drop-purge", "kind": "regex_count_gte", "pattern": "(?im)drop\\s+table\\s+if\\s+exists\\s+\\S+\\s+purge\\s*;", "min": 3, "must": true, "desc": "至少 3 个 drop purge（按年）"},
+        {"id": "C1-ctas-create", "kind": "regex_count_gte", "pattern": "(?im)create\\s+table\\s+\\S+\\s*(?:row\\s+format|stored\\s+as|as\\s+select|as\\s*\\n\\s*select)", "min": 3, "must": true, "desc": "至少 3 个 CTAS"},
+        {"id": "C1-union-all", "kind": "regex_match", "pattern": "(?im)\\bunion\\s+all\\b", "must": true, "desc": "UNION ALL 合并三年"},
+        {"id": "C1-sum-fee-all", "kind": "regex_match", "pattern": "(?i)sum\\s*\\(\\s*fee_all\\s*\\)", "must": true, "desc": "sum(fee_all) 汇总"},
+        {"id": "C1-due-code-23", "kind": "regex_match", "pattern": "due_income_code23", "must": true, "desc": "JOIN 维表 23 年列"},
+        {"id": "C1-due-code-24", "kind": "regex_match", "pattern": "due_income_code24", "must": true, "desc": "JOIN 维表 24 年列"},
+        {"id": "C1-due-code-25", "kind": "regex_match", "pattern": "due_income_code25", "must": true, "desc": "JOIN 维表 25 年列"},
+        {"id": "C1-par-month-2023", "kind": "regex_match", "pattern": "par_month_id\\s*(?:>=|in\\s*\\()\\s*['\"]?202301", "must": true, "desc": "2023 年起始账期"},
+        {"id": "C1-group-by", "kind": "regex_match", "pattern": "(?im)\\bgroup\\s+by\\b", "must": true, "desc": "汇总 GROUP BY"},
+        {"id": "C1-no-zh-placeholder", "kind": "regex_not_match", "pattern": "'\\s*<[一-龥]+>\\s*'|<\\s*(?:待填|请补充|占位符|TBD)\\s*>|'[一-龥]+\\d+'", "must": true, "desc": "SQL 字面量禁尖括号/编号占位"}
+      ]
+    },
+    {
+      "id": "eval-pitfall-offer-dev",
+      "title": "销售品发展量明细——14 条反模式",
+      "tier": "medium",
+      "purpose": "验证 14 条反模式触发：041 主表 + action_id + 排除撤单 + city_id=200 + 标志位不进 WHERE。",
+      "prompt": "按销售品编码 YD0202-556 看 202509 和 202510 月的发展量明细，输出号码、客户名、揽装人、竣工时间、划小局向、揽装局向。",
+      "expected_path": "041 优惠订单表 + dws_offer 补名 + 069 补划小/揽装局向",
+      "assertions": [
+        {"id": "P1-main-table", "kind": "regex_match", "pattern": "(?i)\\bdwm_yz_rpt_comm_ba_msdisc_final\\b", "must": true, "desc": "041 生产表名"},
+        {"id": "P1-action-id", "kind": "regex_match", "pattern": "action_id\\s+IN\\s*\\(\\s*1292\\s*,\\s*6200\\s*\\)|action_id\\s+IN\\s*\\(\\s*6200\\s*,\\s*1292\\s*\\)", "must": true, "desc": "action_id IN (1292,6200)"},
+        {"id": "P1-exclude-cancel", "kind": "regex_match", "pattern": "(?i)subs_stat_reason[\\s\\S]{0,40}NOT\\s+IN\\s*\\(\\s*['\"](?:1200|1300)['\"]", "must": true, "desc": "排除撤单作废（subs_stat_reason NOT IN 1200/1300，允许 COALESCE 包装）"},
+        {"id": "P1-offer-code", "kind": "regex_match", "pattern": "['\"]YD0202-556['\"]", "must": true, "desc": "销售品编码 YD0202-556"},
+        {"id": "P1-period", "kind": "regex_match", "pattern": "202509[\\s\\S]{0,200}202510|202510[\\s\\S]{0,200}202509", "must": true, "desc": "两个账期 202509/202510"},
+        {"id": "P1-city-id-200", "kind": "regex_match", "pattern": "city_id\\s*=\\s*200\\b", "must": true, "desc": "销售品维表必加 city_id=200"},
+        {"id": "P1-no-zh-status", "kind": "regex_not_match", "pattern": "subs_stat\\s+IN\\s*\\(\\s*['\"][一-龥]+['\"]", "must": true, "desc": "状态不写中文"},
+        {"id": "P1-jg-as-flag-col", "kind": "regex_match", "pattern": "(?i)CASE\\s+WHEN[\\s\\S]{0,80}subs_stat\\s*=\\s*['\"]301200['\"][\\s\\S]{0,80}AS\\s+\\w+", "must": false, "desc": "竣工标志位/时间作输出列（CASE WHEN ... AS ...），不作 WHERE 过滤（软规则）"},
+        {"id": "P1-no-zh-placeholder", "kind": "regex_not_match", "pattern": "['\"]销售品编码\\d?['\"]|'\\s*<[一-龥]+>\\s*'|<\\s*(?:待填|请补充|占位符|TBD)\\s*>|'[一-龥]+\\d+'", "must": true, "desc": "SQL 字面量禁尖括号/编号占位"},
+        {"id": "P1-no-select-star", "kind": "regex_not_match", "pattern": "(?im)^\\s*SELECT\\s+\\*", "must": true, "desc": "禁 SELECT *"}
+      ]
+    },
+    {
+      "id": "eval-state-output",
+      "title": "种子 serv_id 当月 state + 上月销售品在档",
+      "tier": "medium",
+      "purpose": "验证 state 默认含义（069.state + 字典 4000000201） + 双账期（当月/上月）+ 014 在档而非 041 动作。",
+      "prompt": "我有一份 serv_id 种子表 ads_zqzw_chaiji_sxf_20260517，告诉我每个号码当月 202605 的状态（含中文）和上月 202604 有没有 YD0202-556 销售品在档。",
+      "expected_path": "VC-20260520-002 模板",
+      "assertions": [
+        {"id": "T1-seed", "kind": "regex_match", "pattern": "ads_zqzw_chaiji_sxf_20260517", "must": true, "desc": "驱动种子表"},
+        {"id": "T1-069-table", "kind": "regex_match", "pattern": "(?i)\\bdwm_yz_tb_comm_cm_all_final\\b", "must": true, "desc": "069 取当月状态"},
+        {"id": "T1-state-field", "kind": "regex_match", "pattern": "(?i)\\.state\\b|\\bstate\\s+AS\\s+|\\bcm\\.state\\b|\\bs\\.state\\b|\\bstate\\s*,", "must": true, "desc": "字段 state（而非 is_cancel_user）"},
+        {"id": "T1-no-is-cancel", "kind": "regex_not_match", "pattern": "is_cancel_user", "must": false, "desc": "默认不应误用 is_cancel_user 替代 state（软规则）"},
+        {"id": "T1-attr-id", "kind": "regex_match", "pattern": "attr_id\\s*=\\s*['\"]4000000201['\"]", "must": true, "desc": "字典 attr_id=4000000201"},
+        {"id": "T1-attr-value-name", "kind": "regex_match", "pattern": "attr_value_name", "must": true, "desc": "中文状态字段"},
+        {"id": "T1-014-table", "kind": "regex_match", "pattern": "(?i)\\bads_yz_rpt_comm_cm_msdisc_final\\b", "must": true, "desc": "014 优惠资料表（在档）"},
+        {"id": "T1-not-041", "kind": "regex_not_match", "pattern": "(?i)\\bdwm_yz_rpt_comm_ba_msdisc_final\\b", "must": true, "desc": "禁用 041（动作表）替代在档"},
+        {"id": "T1-202605", "kind": "regex_match", "pattern": "202605", "must": true, "desc": "当月账期"},
+        {"id": "T1-202604", "kind": "regex_match", "pattern": "202604", "must": true, "desc": "上月账期"},
+        {"id": "T1-offer-code", "kind": "regex_match", "pattern": "['\"]YD0202-556['\"]", "must": true, "desc": "销售品编码 YD0202-556"}
+      ]
+    },
+    {
+      "id": "eval-table-routing",
+      "title": "双线/互联网专线明细——069 优先",
+      "tier": "medium",
+      "purpose": "验证 069 优先于 033，prod_type2 IN (60,70,71) 路由，月租按需补 033。",
+      "prompt": "双线/互联网专线号码的速率和月租，按 202605 当月给我明细。",
+      "expected_path": "069 全业务资料表为主，按需 LEFT JOIN 033 取月租 yz_cs",
+      "assertions": [
+        {"id": "R1-069-table", "kind": "regex_match", "pattern": "(?i)\\bdwm_yz_tb_comm_cm_all_final\\b", "must": true, "desc": "主表 069"},
+        {"id": "R1-prod-type2", "kind": "regex_match", "pattern": "prod_type2\\s+IN\\s*\\([\\s\\S]{0,40}60[\\s\\S]{0,40}\\)|prod_type2\\s+IN\\s*\\([\\s\\S]{0,40}70[\\s\\S]{0,40}\\)", "must": true, "desc": "prod_type2 IN 60/70/71"},
+        {"id": "R1-par-month", "kind": "regex_match", "pattern": "par_month_id\\s*=\\s*['\"]?202605['\"]?", "must": true, "desc": "账期 202605"},
+        {"id": "R1-speed", "kind": "regex_match", "pattern": "speed_value|speed", "must": true, "desc": "包含速率字段"},
+        {"id": "R1-yz-cs-or-033", "kind": "regex_match", "pattern": "yz_cs|ads_yz_jt_dxqx_zx_sl|双线全量清单", "must": false, "desc": "月租通常补 033 的 yz_cs（软规则）"},
+        {"id": "R1-no-zh-placeholder", "kind": "regex_not_match", "pattern": "'\\s*<[一-龥]+>\\s*'|<\\s*(?:待填|请补充|占位符|TBD)\\s*>|'[一-龥]+\\d+'", "must": true, "desc": "SQL 字面量禁尖括号/编号占位"},
+        {"id": "R1-no-select-star", "kind": "regex_not_match", "pattern": "(?im)^\\s*SELECT\\s+\\*", "must": true, "desc": "禁 SELECT *"}
+      ]
+    },
+    {
+      "id": "eval-ambiguous",
+      "title": "129+ 宽带入网量按县分营服汇总",
+      "tier": "medium",
+      "purpose": "验证标准指标 vs 通用入网量的路由判定（命中 M-BASIC-BB-004 标准指标，融合 129+ 关键过滤）。",
+      "prompt": "我要 129+ 宽带入网量，按县分营服汇总。",
+      "expected_path": "M-BASIC-BB-004 129+宽带入网数 标准指标 + 069 主表 + 按营服汇总",
+      "assertions": [
+        {"id": "A1-069-table", "kind": "regex_match", "pattern": "(?i)\\b(?:dwm_yz_tb_comm_cm_all_final|view_ads_yz_tb_comm_cm_all_final)\\b", "must": true, "desc": "069 主表（生产名或视图）"},
+        {"id": "A1-prod-type", "kind": "regex_match", "pattern": "prod_type\\s*=\\s*40\\b", "must": true, "desc": "宽带 prod_type=40"},
+        {"id": "A1-kd-desc", "kind": "regex_match", "pattern": "kd_desc\\s*=\\s*['\"]普通宽带['\"]", "must": true, "desc": "kd_desc='普通宽带'"},
+        {"id": "A1-rh-129", "kind": "regex_match", "pattern": "rh_tc_value\\s*>=\\s*129|rh_tc_value\\s*>\\s*128", "must": true, "desc": "融合套餐档 rh_tc_value>=129"},
+        {"id": "A1-is-rh-ykj", "kind": "regex_match", "pattern": "is_rh_ykj\\s*=\\s*1\\b", "must": true, "desc": "融合一卡机 is_rh_ykj=1"},
+        {"id": "A1-branch", "kind": "regex_match", "pattern": "branch_name|branch_id", "must": true, "desc": "按营服汇总（branch_name/id）"},
+        {"id": "A1-group-by", "kind": "regex_match", "pattern": "(?im)\\bgroup\\s+by\\b", "must": true, "desc": "GROUP BY 汇总"},
+        {"id": "A1-no-channel", "kind": "regex_not_match", "pattern": "channel_branch_name|channel_branch_id", "must": false, "desc": "默认不用揽装营服字段（软规则）"},
+        {"id": "A1-no-zh-placeholder", "kind": "regex_not_match", "pattern": "'\\s*<[一-龥]+>\\s*'|<\\s*(?:待填|请补充|占位符|TBD)\\s*>|'[一-龥]+\\d+'", "must": true, "desc": "SQL 字面量禁尖括号/编号占位（普通宽带等正常字面量允许）"},
+        {"id": "A1-no-select-star", "kind": "regex_not_match", "pattern": "(?im)^\\s*SELECT\\s+\\*", "must": true, "desc": "禁 SELECT *"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,995 @@
+{
+  "workspace": "iteration-1",
+  "skill": "write-query",
+  "skill_path": ".claude/skills/write-query/SKILL.md",
+  "summary": {
+    "with_skill": {
+      "passed": 6,
+      "failed": 0,
+      "missing": 0,
+      "avg_score": 1.0
+    },
+    "without_skill": {
+      "passed": 0,
+      "failed": 6,
+      "missing": 0,
+      "avg_score": 0.435
+    }
+  },
+  "results": [
+    {
+      "eval_id": "eval-simple-metric",
+      "title": "简单标准指标——主宽到达数",
+      "tier": "simple",
+      "groups": {
+        "with_skill": {
+          "status": "pass",
+          "score": 1.0,
+          "passed_count": 9,
+          "total": 9,
+          "must_failed": 0,
+          "assertion_results": [
+            {
+              "id": "S1-table",
+              "desc": "使用 069 生产日表",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "S1-not-old-prefix",
+              "desc": "禁用旧 ads_yz_tb_comm_cm_all_final 前缀",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            },
+            {
+              "id": "S1-par-month",
+              "desc": "分区裁剪到 202605",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "S1-prod-type",
+              "desc": "主宽 prod_type=40",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "S1-kd-desc",
+              "desc": "kd_desc='普通宽带'",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "S1-is-cz",
+              "desc": "is_cz=1 标志到达",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "S1-is-cancel",
+              "desc": "未拆机过滤",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "S1-no-zh-placeholder",
+              "desc": "SQL 字面量禁尖括号/编号占位",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            },
+            {
+              "id": "S1-no-select-star",
+              "desc": "禁 SELECT *",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            }
+          ],
+          "sql_chars": 379
+        },
+        "without_skill": {
+          "status": "fail",
+          "score": 0.3333,
+          "passed_count": 3,
+          "total": 9,
+          "must_failed": 6,
+          "assertion_results": [
+            {
+              "id": "S1-table",
+              "desc": "使用 069 生产日表",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "S1-not-old-prefix",
+              "desc": "禁用旧 ads_yz_tb_comm_cm_all_final 前缀",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            },
+            {
+              "id": "S1-par-month",
+              "desc": "分区裁剪到 202605",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "S1-prod-type",
+              "desc": "主宽 prod_type=40",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "S1-kd-desc",
+              "desc": "kd_desc='普通宽带'",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "S1-is-cz",
+              "desc": "is_cz=1 标志到达",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "S1-is-cancel",
+              "desc": "未拆机过滤",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "S1-no-zh-placeholder",
+              "desc": "SQL 字面量禁尖括号/编号占位",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            },
+            {
+              "id": "S1-no-select-star",
+              "desc": "禁 SELECT *",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            }
+          ],
+          "sql_chars": 339
+        }
+      }
+    },
+    {
+      "eval_id": "eval-complex-ctas",
+      "title": "复杂科目级税后收入按年分列汇总",
+      "tier": "complex",
+      "groups": {
+        "with_skill": {
+          "status": "pass",
+          "score": 1.0,
+          "passed_count": 11,
+          "total": 11,
+          "must_failed": 0,
+          "assertion_results": [
+            {
+              "id": "C1-main-table",
+              "desc": "048 主表",
+              "must": true,
+              "passed": true,
+              "note": "命中 4 处"
+            },
+            {
+              "id": "C1-ctas-drop-purge",
+              "desc": "至少 3 个 drop purge（按年）",
+              "must": true,
+              "passed": true,
+              "note": "命中 5 次（要求 >= 3）"
+            },
+            {
+              "id": "C1-ctas-create",
+              "desc": "至少 3 个 CTAS",
+              "must": true,
+              "passed": true,
+              "note": "命中 5 次（要求 >= 3）"
+            },
+            {
+              "id": "C1-union-all",
+              "desc": "UNION ALL 合并三年",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "C1-sum-fee-all",
+              "desc": "sum(fee_all) 汇总",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "C1-due-code-23",
+              "desc": "JOIN 维表 23 年列",
+              "must": true,
+              "passed": true,
+              "note": "命中 1 处"
+            },
+            {
+              "id": "C1-due-code-24",
+              "desc": "JOIN 维表 24 年列",
+              "must": true,
+              "passed": true,
+              "note": "命中 1 处"
+            },
+            {
+              "id": "C1-due-code-25",
+              "desc": "JOIN 维表 25 年列",
+              "must": true,
+              "passed": true,
+              "note": "命中 1 处"
+            },
+            {
+              "id": "C1-par-month-2023",
+              "desc": "2023 年起始账期",
+              "must": true,
+              "passed": true,
+              "note": "命中 1 处"
+            },
+            {
+              "id": "C1-group-by",
+              "desc": "汇总 GROUP BY",
+              "must": true,
+              "passed": true,
+              "note": "命中 1 处"
+            },
+            {
+              "id": "C1-no-zh-placeholder",
+              "desc": "SQL 字面量禁尖括号/编号占位",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            }
+          ],
+          "sql_chars": 4772
+        },
+        "without_skill": {
+          "status": "fail",
+          "score": 0.5455,
+          "passed_count": 6,
+          "total": 11,
+          "must_failed": 5,
+          "assertion_results": [
+            {
+              "id": "C1-main-table",
+              "desc": "048 主表",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "C1-ctas-drop-purge",
+              "desc": "至少 3 个 drop purge（按年）",
+              "must": true,
+              "passed": false,
+              "note": "命中 0 次（要求 >= 3）"
+            },
+            {
+              "id": "C1-ctas-create",
+              "desc": "至少 3 个 CTAS",
+              "must": true,
+              "passed": false,
+              "note": "命中 0 次（要求 >= 3）"
+            },
+            {
+              "id": "C1-union-all",
+              "desc": "UNION ALL 合并三年",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "C1-sum-fee-all",
+              "desc": "sum(fee_all) 汇总",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "C1-due-code-23",
+              "desc": "JOIN 维表 23 年列",
+              "must": true,
+              "passed": true,
+              "note": "命中 4 处"
+            },
+            {
+              "id": "C1-due-code-24",
+              "desc": "JOIN 维表 24 年列",
+              "must": true,
+              "passed": true,
+              "note": "命中 4 处"
+            },
+            {
+              "id": "C1-due-code-25",
+              "desc": "JOIN 维表 25 年列",
+              "must": true,
+              "passed": true,
+              "note": "命中 4 处"
+            },
+            {
+              "id": "C1-par-month-2023",
+              "desc": "2023 年起始账期",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "C1-group-by",
+              "desc": "汇总 GROUP BY",
+              "must": true,
+              "passed": true,
+              "note": "命中 1 处"
+            },
+            {
+              "id": "C1-no-zh-placeholder",
+              "desc": "SQL 字面量禁尖括号/编号占位",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            }
+          ],
+          "sql_chars": 2914
+        }
+      }
+    },
+    {
+      "eval_id": "eval-pitfall-offer-dev",
+      "title": "销售品发展量明细——14 条反模式",
+      "tier": "medium",
+      "groups": {
+        "with_skill": {
+          "status": "pass",
+          "score": 1.0,
+          "passed_count": 10,
+          "total": 10,
+          "must_failed": 0,
+          "assertion_results": [
+            {
+              "id": "P1-main-table",
+              "desc": "041 生产表名",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "P1-action-id",
+              "desc": "action_id IN (1292,6200)",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "P1-exclude-cancel",
+              "desc": "排除撤单作废（subs_stat_reason NOT IN 1200/1300，允许 COALESCE 包装）",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "P1-offer-code",
+              "desc": "销售品编码 YD0202-556",
+              "must": true,
+              "passed": true,
+              "note": "命中 1 处"
+            },
+            {
+              "id": "P1-period",
+              "desc": "两个账期 202509/202510",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "P1-city-id-200",
+              "desc": "销售品维表必加 city_id=200",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "P1-no-zh-status",
+              "desc": "状态不写中文",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            },
+            {
+              "id": "P1-jg-as-flag-col",
+              "desc": "竣工标志位/时间作输出列（CASE WHEN ... AS ...），不作 WHERE 过滤（软规则）",
+              "must": false,
+              "passed": true,
+              "note": "命中 1 处"
+            },
+            {
+              "id": "P1-no-zh-placeholder",
+              "desc": "SQL 字面量禁尖括号/编号占位",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            },
+            {
+              "id": "P1-no-select-star",
+              "desc": "禁 SELECT *",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            }
+          ],
+          "sql_chars": 2021
+        },
+        "without_skill": {
+          "status": "fail",
+          "score": 0.5,
+          "passed_count": 5,
+          "total": 10,
+          "must_failed": 4,
+          "assertion_results": [
+            {
+              "id": "P1-main-table",
+              "desc": "041 生产表名",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "P1-action-id",
+              "desc": "action_id IN (1292,6200)",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "P1-exclude-cancel",
+              "desc": "排除撤单作废（subs_stat_reason NOT IN 1200/1300，允许 COALESCE 包装）",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "P1-offer-code",
+              "desc": "销售品编码 YD0202-556",
+              "must": true,
+              "passed": true,
+              "note": "命中 1 处"
+            },
+            {
+              "id": "P1-period",
+              "desc": "两个账期 202509/202510",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "P1-city-id-200",
+              "desc": "销售品维表必加 city_id=200",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "P1-no-zh-status",
+              "desc": "状态不写中文",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            },
+            {
+              "id": "P1-jg-as-flag-col",
+              "desc": "竣工标志位/时间作输出列（CASE WHEN ... AS ...），不作 WHERE 过滤（软规则）",
+              "must": false,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "P1-no-zh-placeholder",
+              "desc": "SQL 字面量禁尖括号/编号占位",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            },
+            {
+              "id": "P1-no-select-star",
+              "desc": "禁 SELECT *",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            }
+          ],
+          "sql_chars": 629
+        }
+      }
+    },
+    {
+      "eval_id": "eval-state-output",
+      "title": "种子 serv_id 当月 state + 上月销售品在档",
+      "tier": "medium",
+      "groups": {
+        "with_skill": {
+          "status": "pass",
+          "score": 1.0,
+          "passed_count": 11,
+          "total": 11,
+          "must_failed": 0,
+          "assertion_results": [
+            {
+              "id": "T1-seed",
+              "desc": "驱动种子表",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "T1-069-table",
+              "desc": "069 取当月状态",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "T1-state-field",
+              "desc": "字段 state（而非 is_cancel_user）",
+              "must": true,
+              "passed": true,
+              "note": "命中 3 处"
+            },
+            {
+              "id": "T1-no-is-cancel",
+              "desc": "默认不应误用 is_cancel_user 替代 state（软规则）",
+              "must": false,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            },
+            {
+              "id": "T1-attr-id",
+              "desc": "字典 attr_id=4000000201",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "T1-attr-value-name",
+              "desc": "中文状态字段",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "T1-014-table",
+              "desc": "014 优惠资料表（在档）",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "T1-not-041",
+              "desc": "禁用 041（动作表）替代在档",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            },
+            {
+              "id": "T1-202605",
+              "desc": "当月账期",
+              "must": true,
+              "passed": true,
+              "note": "命中 6 处"
+            },
+            {
+              "id": "T1-202604",
+              "desc": "上月账期",
+              "must": true,
+              "passed": true,
+              "note": "命中 3 处"
+            },
+            {
+              "id": "T1-offer-code",
+              "desc": "销售品编码 YD0202-556",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            }
+          ],
+          "sql_chars": 1502
+        },
+        "without_skill": {
+          "status": "fail",
+          "score": 0.5455,
+          "passed_count": 6,
+          "total": 11,
+          "must_failed": 5,
+          "assertion_results": [
+            {
+              "id": "T1-seed",
+              "desc": "驱动种子表",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "T1-069-table",
+              "desc": "069 取当月状态",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "T1-state-field",
+              "desc": "字段 state（而非 is_cancel_user）",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "T1-no-is-cancel",
+              "desc": "默认不应误用 is_cancel_user 替代 state（软规则）",
+              "must": false,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            },
+            {
+              "id": "T1-attr-id",
+              "desc": "字典 attr_id=4000000201",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "T1-attr-value-name",
+              "desc": "中文状态字段",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "T1-014-table",
+              "desc": "014 优惠资料表（在档）",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "T1-not-041",
+              "desc": "禁用 041（动作表）替代在档",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            },
+            {
+              "id": "T1-202605",
+              "desc": "当月账期",
+              "must": true,
+              "passed": true,
+              "note": "命中 7 处"
+            },
+            {
+              "id": "T1-202604",
+              "desc": "上月账期",
+              "must": true,
+              "passed": true,
+              "note": "命中 4 处"
+            },
+            {
+              "id": "T1-offer-code",
+              "desc": "销售品编码 YD0202-556",
+              "must": true,
+              "passed": true,
+              "note": "命中 1 处"
+            }
+          ],
+          "sql_chars": 1222
+        }
+      }
+    },
+    {
+      "eval_id": "eval-table-routing",
+      "title": "双线/互联网专线明细——069 优先",
+      "tier": "medium",
+      "groups": {
+        "with_skill": {
+          "status": "pass",
+          "score": 1.0,
+          "passed_count": 7,
+          "total": 7,
+          "must_failed": 0,
+          "assertion_results": [
+            {
+              "id": "R1-069-table",
+              "desc": "主表 069",
+              "must": true,
+              "passed": true,
+              "note": "命中 1 处"
+            },
+            {
+              "id": "R1-prod-type2",
+              "desc": "prod_type2 IN 60/70/71",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "R1-par-month",
+              "desc": "账期 202605",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "R1-speed",
+              "desc": "包含速率字段",
+              "must": true,
+              "passed": true,
+              "note": "命中 4 处"
+            },
+            {
+              "id": "R1-yz-cs-or-033",
+              "desc": "月租通常补 033 的 yz_cs（软规则）",
+              "must": false,
+              "passed": true,
+              "note": "命中 5 处"
+            },
+            {
+              "id": "R1-no-zh-placeholder",
+              "desc": "SQL 字面量禁尖括号/编号占位",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            },
+            {
+              "id": "R1-no-select-star",
+              "desc": "禁 SELECT *",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            }
+          ],
+          "sql_chars": 1397
+        },
+        "without_skill": {
+          "status": "fail",
+          "score": 0.2857,
+          "passed_count": 2,
+          "total": 7,
+          "must_failed": 4,
+          "assertion_results": [
+            {
+              "id": "R1-069-table",
+              "desc": "主表 069",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "R1-prod-type2",
+              "desc": "prod_type2 IN 60/70/71",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "R1-par-month",
+              "desc": "账期 202605",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "R1-speed",
+              "desc": "包含速率字段",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "R1-yz-cs-or-033",
+              "desc": "月租通常补 033 的 yz_cs（软规则）",
+              "must": false,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "R1-no-zh-placeholder",
+              "desc": "SQL 字面量禁尖括号/编号占位",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            },
+            {
+              "id": "R1-no-select-star",
+              "desc": "禁 SELECT *",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            }
+          ],
+          "sql_chars": 797
+        }
+      }
+    },
+    {
+      "eval_id": "eval-ambiguous",
+      "title": "129+ 宽带入网量按县分营服汇总",
+      "tier": "medium",
+      "groups": {
+        "with_skill": {
+          "status": "pass",
+          "score": 1.0,
+          "passed_count": 10,
+          "total": 10,
+          "must_failed": 0,
+          "assertion_results": [
+            {
+              "id": "A1-069-table",
+              "desc": "069 主表（生产名或视图）",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "A1-prod-type",
+              "desc": "宽带 prod_type=40",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "A1-kd-desc",
+              "desc": "kd_desc='普通宽带'",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "A1-rh-129",
+              "desc": "融合套餐档 rh_tc_value>=129",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "A1-is-rh-ykj",
+              "desc": "融合一卡机 is_rh_ykj=1",
+              "must": true,
+              "passed": true,
+              "note": "命中 2 处"
+            },
+            {
+              "id": "A1-branch",
+              "desc": "按营服汇总（branch_name/id）",
+              "must": true,
+              "passed": true,
+              "note": "命中 3 处"
+            },
+            {
+              "id": "A1-group-by",
+              "desc": "GROUP BY 汇总",
+              "must": true,
+              "passed": true,
+              "note": "命中 1 处"
+            },
+            {
+              "id": "A1-no-channel",
+              "desc": "默认不用揽装营服字段（软规则）",
+              "must": false,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            },
+            {
+              "id": "A1-no-zh-placeholder",
+              "desc": "SQL 字面量禁尖括号/编号占位（普通宽带等正常字面量允许）",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            },
+            {
+              "id": "A1-no-select-star",
+              "desc": "禁 SELECT *",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            }
+          ],
+          "sql_chars": 943
+        },
+        "without_skill": {
+          "status": "fail",
+          "score": 0.4,
+          "passed_count": 4,
+          "total": 10,
+          "must_failed": 6,
+          "assertion_results": [
+            {
+              "id": "A1-069-table",
+              "desc": "069 主表（生产名或视图）",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "A1-prod-type",
+              "desc": "宽带 prod_type=40",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "A1-kd-desc",
+              "desc": "kd_desc='普通宽带'",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "A1-rh-129",
+              "desc": "融合套餐档 rh_tc_value>=129",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "A1-is-rh-ykj",
+              "desc": "融合一卡机 is_rh_ykj=1",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "A1-branch",
+              "desc": "按营服汇总（branch_name/id）",
+              "must": true,
+              "passed": false,
+              "note": "未命中"
+            },
+            {
+              "id": "A1-group-by",
+              "desc": "GROUP BY 汇总",
+              "must": true,
+              "passed": true,
+              "note": "命中 1 处"
+            },
+            {
+              "id": "A1-no-channel",
+              "desc": "默认不用揽装营服字段（软规则）",
+              "must": false,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            },
+            {
+              "id": "A1-no-zh-placeholder",
+              "desc": "SQL 字面量禁尖括号/编号占位（普通宽带等正常字面量允许）",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            },
+            {
+              "id": "A1-no-select-star",
+              "desc": "禁 SELECT *",
+              "must": true,
+              "passed": true,
+              "note": "未命中（符合预期）"
+            }
+          ],
+          "sql_chars": 646
+        }
+      }
+    }
+  ]
+}

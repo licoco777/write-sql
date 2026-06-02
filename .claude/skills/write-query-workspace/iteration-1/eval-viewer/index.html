@@ -1,0 +1,809 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>write-query evals · iteration-1</title>
+<style>
+:root {
+  --pass: #1f883d; --fail: #cf222e; --warn: #bf8700; --bg: #f6f8fa; --fg: #1f2328;
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 24px; background: var(--bg); color: var(--fg); }
+header { background: #fff; padding: 16px 24px; border: 1px solid #d0d7de; border-radius: 8px; margin-bottom: 24px; }
+header h1 { margin: 0 0 8px; font-size: 22px; }
+table { border-collapse: collapse; width: 100%; background: #fff; margin: 12px 0; border: 1px solid #d0d7de; border-radius: 8px; overflow: hidden; }
+th, td { padding: 8px 12px; border-bottom: 1px solid #d0d7de; text-align: left; vertical-align: top; font-size: 14px; }
+th { background: #f0f3f6; font-weight: 600; }
+section.eval { background: #fff; padding: 16px 24px; border: 1px solid #d0d7de; border-radius: 8px; margin-bottom: 16px; }
+section.eval h2 { margin-top: 0; font-size: 18px; }
+section.eval h2 .tier { background: #ddf4ff; color: #0969da; padding: 2px 8px; border-radius: 8px; font-size: 12px; margin-left: 8px; }
+.group { margin: 12px 0; border-top: 1px solid #eaeef2; padding-top: 12px; }
+.group-header { display: flex; justify-content: space-between; align-items: center; }
+.group-header h3 { margin: 0; font-size: 16px; }
+.score.ok { color: var(--pass); }
+.score.bad { color: var(--fail); }
+.score.missing { color: var(--warn); }
+details { margin: 8px 0; }
+summary { cursor: pointer; padding: 4px 0; color: #0969da; }
+.badge { padding: 2px 8px; border-radius: 6px; font-size: 12px; }
+.badge.pass { background: #dafbe1; color: var(--pass); }
+.badge.fail-must { background: #ffebe9; color: var(--fail); }
+.badge.fail-soft { background: #fff8c5; color: var(--warn); }
+tr.pass td { background: #f6fff7; }
+tr.fail-must td { background: #fff5f5; }
+tr.fail-soft td { background: #fffaef; }
+pre { background: #0d1117; color: #d1d7e0; padding: 16px; border-radius: 8px; overflow: auto; max-height: 480px; }
+code { font-family: 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>write-query evals · iteration-1</h1>
+  <div>skill: <code>.claude/skills/write-query/SKILL.md</code></div>
+</header>
+
+<h2>汇总</h2>
+
+    <table class="summary">
+      <thead><tr><th>分组</th><th>通过</th><th>失败</th><th>缺失</th><th>平均得分</th></tr></thead>
+      <tbody><tr><td>with_skill</td><td>6</td><td>0</td><td>0</td><td>100.00%</td></tr><tr><td>without_skill</td><td>0</td><td>6</td><td>0</td><td>43.50%</td></tr></tbody>
+    </table>
+    
+
+
+
+<h2>逐 eval 明细</h2>
+<section class="eval" id="eval-simple-metric">
+<h2>eval-simple-metric · 简单标准指标——主宽到达数 <small class="tier">simple</small></h2>
+
+            <div class="group">
+              <div class="group-header">
+                <h3>With Skill</h3>
+                <span class="score ok">得分 100% · 通过 9/9 · 必过失败 0 · 状态 pass</span>
+              </div>
+              <details>
+                <summary>查看断言明细</summary>
+                <table class="assertions">
+                  <thead><tr><th>ID</th><th>描述</th><th>等级</th><th>结果</th><th>备注</th></tr></thead>
+                  <tbody><tr class="pass"><td>S1-table</td><td>使用 069 生产日表</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>S1-not-old-prefix</td><td>禁用旧 ads_yz_tb_comm_cm_all_final 前缀</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr><tr class="pass"><td>S1-par-month</td><td>分区裁剪到 202605</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>S1-prod-type</td><td>主宽 prod_type=40</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>S1-kd-desc</td><td>kd_desc=&#x27;普通宽带&#x27;</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>S1-is-cz</td><td>is_cz=1 标志到达</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>S1-is-cancel</td><td>未拆机过滤</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>S1-no-zh-placeholder</td><td>SQL 字面量禁尖括号/编号占位</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr><tr class="pass"><td>S1-no-select-star</td><td>禁 SELECT *</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr></tbody>
+                </table>
+              </details>
+              <details>
+                <summary>查看生成的 SQL（379 字符）</summary>
+                <pre><code>-- 指标：主宽到达数（M-BASIC-BB-003）
+-- 主表：dwm_yz_tb_comm_cm_all_final（069 全业务资料表，日表）
+-- 口径：par_month_id=202605 AND is_cancel_user=0 AND prod_type=40 AND kd_desc=&#x27;普通宽带&#x27; AND is_cz=1
+SELECT COUNT(DISTINCT serv_id) AS main_broadband_arrive_cnt
+FROM dwm_yz_tb_comm_cm_all_final
+WHERE par_month_id = 202605
+  AND is_cancel_user = 0
+  AND prod_type = 40
+  AND kd_desc = &#x27;普通宽带&#x27;
+  AND is_cz = 1;
+</code></pre>
+              </details>
+            </div>
+            
+
+            <div class="group">
+              <div class="group-header">
+                <h3>Without Skill</h3>
+                <span class="score bad">得分 33% · 通过 3/9 · 必过失败 6 · 状态 fail</span>
+              </div>
+              <details>
+                <summary>查看断言明细</summary>
+                <table class="assertions">
+                  <thead><tr><th>ID</th><th>描述</th><th>等级</th><th>结果</th><th>备注</th></tr></thead>
+                  <tbody><tr class="fail-must"><td>S1-table</td><td>使用 069 生产日表</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="pass"><td>S1-not-old-prefix</td><td>禁用旧 ads_yz_tb_comm_cm_all_final 前缀</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr><tr class="fail-must"><td>S1-par-month</td><td>分区裁剪到 202605</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="fail-must"><td>S1-prod-type</td><td>主宽 prod_type=40</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="fail-must"><td>S1-kd-desc</td><td>kd_desc=&#x27;普通宽带&#x27;</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="fail-must"><td>S1-is-cz</td><td>is_cz=1 标志到达</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="fail-must"><td>S1-is-cancel</td><td>未拆机过滤</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="pass"><td>S1-no-zh-placeholder</td><td>SQL 字面量禁尖括号/编号占位</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr><tr class="pass"><td>S1-no-select-star</td><td>禁 SELECT *</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr></tbody>
+                </table>
+              </details>
+              <details>
+                <summary>查看生成的 SQL（339 字符）</summary>
+                <pre><code>-- 取 202605 主宽到达数（月末主宽在网数）
+-- 推测表：宽带到达多维表（ads 层），按月分区
+SELECT
+    COUNT(DISTINCT acc_nbr)              AS zhukuan_arrival_cnt   -- 主宽到达数
+FROM ads_yz_kd_dada_list
+WHERE month_id = &#x27;202605&#x27;
+  AND is_zhukuan = &#x27;1&#x27;                                            -- 主宽标识=是
+  AND is_active = &#x27;1&#x27;                                             -- 月末在网
+;
+</code></pre>
+              </details>
+            </div>
+            
+</section>
+<section class="eval" id="eval-complex-ctas">
+<h2>eval-complex-ctas · 复杂科目级税后收入按年分列汇总 <small class="tier">complex</small></h2>
+
+            <div class="group">
+              <div class="group-header">
+                <h3>With Skill</h3>
+                <span class="score ok">得分 100% · 通过 11/11 · 必过失败 0 · 状态 pass</span>
+              </div>
+              <details>
+                <summary>查看断言明细</summary>
+                <table class="assertions">
+                  <thead><tr><th>ID</th><th>描述</th><th>等级</th><th>结果</th><th>备注</th></tr></thead>
+                  <tbody><tr class="pass"><td>C1-main-table</td><td>048 主表</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 4 处</td></tr><tr class="pass"><td>C1-ctas-drop-purge</td><td>至少 3 个 drop purge（按年）</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 5 次（要求 &gt;= 3）</td></tr><tr class="pass"><td>C1-ctas-create</td><td>至少 3 个 CTAS</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 5 次（要求 &gt;= 3）</td></tr><tr class="pass"><td>C1-union-all</td><td>UNION ALL 合并三年</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>C1-sum-fee-all</td><td>sum(fee_all) 汇总</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>C1-due-code-23</td><td>JOIN 维表 23 年列</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 1 处</td></tr><tr class="pass"><td>C1-due-code-24</td><td>JOIN 维表 24 年列</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 1 处</td></tr><tr class="pass"><td>C1-due-code-25</td><td>JOIN 维表 25 年列</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 1 处</td></tr><tr class="pass"><td>C1-par-month-2023</td><td>2023 年起始账期</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 1 处</td></tr><tr class="pass"><td>C1-group-by</td><td>汇总 GROUP BY</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 1 处</td></tr><tr class="pass"><td>C1-no-zh-placeholder</td><td>SQL 字面量禁尖括号/编号占位</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr></tbody>
+                </table>
+              </details>
+              <details>
+                <summary>查看生成的 SQL（4772 字符）</summary>
+                <pre><code>-- 复杂场景 CTAS 流水线：按年（23/24/25）从用户科目维表匹配 SR 科目税后收入，按维度汇总
+-- 主表：dwm_srhx_src_income_list_mon（048 全量科目级收入）
+-- 维表：ads_yz_zqb_xc_due_income_code_dim_list（用户已提供，三列年码）
+-- 模板：verified-cases/VC-20260520-001
+-- 营服默认划小营服 branch_name，不用揽装营服 channel_branch_name
+-- 度量：sum(fee_all)（税后确认收入）
+
+-- 步骤1：23 年明细
+drop table if exists tmp_ads_yz_zqb_xc_code_cust_sr_dwb_23 purge;
+create table tmp_ads_yz_zqb_xc_code_cust_sr_dwb_23
+row format delimited fields terminated by &#x27;\u0001&#x27;
+stored as orc tblproperties(&#x27;orc.compression&#x27;=&#x27;snappy&#x27;) as
+select
+    a.par_month_id,
+    a.subst_id,
+    a.subst_name,
+    a.branch_id,
+    a.branch_name,
+    a.cust_nbr,
+    a.cust_name,
+    a.prod_id,
+    a.prod_name,
+    a.sales_id,
+    a.sales_code,
+    a.sales_name,
+    a.contract_flag,
+    a.is_filter,
+    a.due_income_code,
+    a.fee_all
+from dwm_srhx_src_income_list_mon a
+join ads_yz_zqb_xc_due_income_code_dim_list b
+  on a.due_income_code = b.due_income_code23
+where a.par_month_id &gt;= 202301
+  and a.par_month_id &lt;= 202312
+  and a.contract_flag = 1
+  and a.is_filter = 0;
+-- select count(*) from tmp_ads_yz_zqb_xc_code_cust_sr_dwb_23;
+
+-- 步骤2：24 年明细
+drop table if exists tmp_ads_yz_zqb_xc_code_cust_sr_dwb_24 purge;
+create table tmp_ads_yz_zqb_xc_code_cust_sr_dwb_24
+row format delimited fields terminated by &#x27;\u0001&#x27;
+stored as orc tblproperties(&#x27;orc.compression&#x27;=&#x27;snappy&#x27;) as
+select
+    a.par_month_id,
+    a.subst_id,
+    a.subst_name,
+    a.branch_id,
+    a.branch_name,
+    a.cust_nbr,
+    a.cust_name,
+    a.prod_id,
+    a.prod_name,
+    a.sales_id,
+    a.sales_code,
+    a.sales_name,
+    a.contract_flag,
+    a.is_filter,
+    a.due_income_code,
+    a.fee_all
+from dwm_srhx_src_income_list_mon a
+join ads_yz_zqb_xc_due_income_code_dim_list b
+  on a.due_income_code = b.due_income_code24
+where a.par_month_id &gt;= 202401
+  and a.par_month_id &lt;= 202412
+  and a.contract_flag = 1
+  and a.is_filter = 0;
+-- select count(*) from tmp_ads_yz_zqb_xc_code_cust_sr_dwb_24;
+
+-- 步骤3：25 年明细
+drop table if exists tmp_ads_yz_zqb_xc_code_cust_sr_dwb_25 purge;
+create table tmp_ads_yz_zqb_xc_code_cust_sr_dwb_25
+row format delimited fields terminated by &#x27;\u0001&#x27;
+stored as orc tblproperties(&#x27;orc.compression&#x27;=&#x27;snappy&#x27;) as
+select
+    a.par_month_id,
+    a.subst_id,
+    a.subst_name,
+    a.branch_id,
+    a.branch_name,
+    a.cust_nbr,
+    a.cust_name,
+    a.prod_id,
+    a.prod_name,
+    a.sales_id,
+    a.sales_code,
+    a.sales_name,
+    a.contract_flag,
+    a.is_filter,
+    a.due_income_code,
+    a.fee_all
+from dwm_srhx_src_income_list_mon a
+join ads_yz_zqb_xc_due_income_code_dim_list b
+  on a.due_income_code = b.due_income_code25
+where a.par_month_id &gt;= 202501
+  and a.par_month_id &lt;= 202512
+  and a.contract_flag = 1
+  and a.is_filter = 0;
+-- select count(*) from tmp_ads_yz_zqb_xc_code_cust_sr_dwb_25;
+
+-- 步骤4：三年合并
+drop table if exists tmp_ads_yz_zqb_xc_code_cust_sr_dwb_union purge;
+create table tmp_ads_yz_zqb_xc_code_cust_sr_dwb_union
+row format delimited fields terminated by &#x27;\u0001&#x27;
+stored as orc tblproperties(&#x27;orc.compression&#x27;=&#x27;snappy&#x27;) as
+select
+    par_month_id, subst_id, subst_name, branch_id, branch_name,
+    cust_nbr, cust_name, prod_id, prod_name,
+    sales_id, sales_code, sales_name,
+    contract_flag, is_filter, due_income_code, fee_all
+from tmp_ads_yz_zqb_xc_code_cust_sr_dwb_23
+union all
+select
+    par_month_id, subst_id, subst_name, branch_id, branch_name,
+    cust_nbr, cust_name, prod_id, prod_name,
+    sales_id, sales_code, sales_name,
+    contract_flag, is_filter, due_income_code, fee_all
+from tmp_ads_yz_zqb_xc_code_cust_sr_dwb_24
+union all
+select
+    par_month_id, subst_id, subst_name, branch_id, branch_name,
+    cust_nbr, cust_name, prod_id, prod_name,
+    sales_id, sales_code, sales_name,
+    contract_flag, is_filter, due_income_code, fee_all
+from tmp_ads_yz_zqb_xc_code_cust_sr_dwb_25;
+-- select count(*) from tmp_ads_yz_zqb_xc_code_cust_sr_dwb_union;
+
+-- 步骤5：按年 + 局向/营服/产权客户/产品/揽装人汇总
+drop table if exists ads_yz_zqb_xc_code_cust_sr_dwb purge;
+create table ads_yz_zqb_xc_code_cust_sr_dwb
+row format delimited fields terminated by &#x27;\u0001&#x27;
+stored as orc tblproperties(&#x27;orc.compression&#x27;=&#x27;snappy&#x27;) as
+select
+    200 as city_id,
+    substr(cast(par_month_id as string), 1, 4) as year_id,
+    subst_id,
+    subst_name,
+    branch_id,
+    branch_name,
+    cust_nbr,
+    cust_name,
+    prod_id,
+    prod_name,
+    sales_id,
+    sales_code,
+    sales_name,
+    contract_flag,
+    is_filter,
+    sum(fee_all) as sh
+from tmp_ads_yz_zqb_xc_code_cust_sr_dwb_union
+group by
+    substr(cast(par_month_id as string), 1, 4),
+    subst_id,
+    subst_name,
+    branch_id,
+    branch_name,
+    cust_nbr,
+    cust_name,
+    prod_id,
+    prod_name,
+    sales_id,
+    sales_code,
+    sales_name,
+    contract_flag,
+    is_filter;
+-- select count(*) from ads_yz_zqb_xc_code_cust_sr_dwb;
+</code></pre>
+              </details>
+            </div>
+            
+
+            <div class="group">
+              <div class="group-header">
+                <h3>Without Skill</h3>
+                <span class="score bad">得分 55% · 通过 6/11 · 必过失败 5 · 状态 fail</span>
+              </div>
+              <details>
+                <summary>查看断言明细</summary>
+                <table class="assertions">
+                  <thead><tr><th>ID</th><th>描述</th><th>等级</th><th>结果</th><th>备注</th></tr></thead>
+                  <tbody><tr class="fail-must"><td>C1-main-table</td><td>048 主表</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="fail-must"><td>C1-ctas-drop-purge</td><td>至少 3 个 drop purge（按年）</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>命中 0 次（要求 &gt;= 3）</td></tr><tr class="fail-must"><td>C1-ctas-create</td><td>至少 3 个 CTAS</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>命中 0 次（要求 &gt;= 3）</td></tr><tr class="pass"><td>C1-union-all</td><td>UNION ALL 合并三年</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="fail-must"><td>C1-sum-fee-all</td><td>sum(fee_all) 汇总</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="pass"><td>C1-due-code-23</td><td>JOIN 维表 23 年列</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 4 处</td></tr><tr class="pass"><td>C1-due-code-24</td><td>JOIN 维表 24 年列</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 4 处</td></tr><tr class="pass"><td>C1-due-code-25</td><td>JOIN 维表 25 年列</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 4 处</td></tr><tr class="fail-must"><td>C1-par-month-2023</td><td>2023 年起始账期</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="pass"><td>C1-group-by</td><td>汇总 GROUP BY</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 1 处</td></tr><tr class="pass"><td>C1-no-zh-placeholder</td><td>SQL 字面量禁尖括号/编号占位</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr></tbody>
+                </table>
+              </details>
+              <details>
+                <summary>查看生成的 SQL（2914 字符）</summary>
+                <pre><code>-- 按年（23/24/25）匹配 SR 科目税后收入
+-- 维表 ads_yz_zqb_xc_due_income_code_dim_list 三列：due_income_code23 / due_income_code24 / due_income_code25
+-- 维度：局向 / 营服 / 产权客户 / 产品 / 揽装人
+-- 度量：确认收入（税后）
+
+-- 1. 建目标表（若不存在）
+CREATE TABLE IF NOT EXISTS ads_yz_sr_income_year_summary (
+    juxiang             STRING       COMMENT &#x27;局向&#x27;,
+    yingfu              STRING       COMMENT &#x27;营服&#x27;,
+    cq_cust_name        STRING       COMMENT &#x27;产权客户&#x27;,
+    prod_id             STRING       COMMENT &#x27;产品&#x27;,
+    lanzhuang_staff     STRING       COMMENT &#x27;揽装人&#x27;,
+    year_id             STRING       COMMENT &#x27;年份(23/24/25)&#x27;,
+    sr_income_aftertax  DECIMAL(20,2) COMMENT &#x27;确认收入(税后)&#x27;
+)
+PARTITIONED BY (etl_month STRING)
+STORED AS ORC
+;
+
+-- 2. 写入逻辑：把 23/24/25 三年分别 JOIN 维表对应的 code 列再 UNION 汇总
+INSERT OVERWRITE TABLE ads_yz_sr_income_year_summary PARTITION (etl_month = &#x27;${etl_month}&#x27;)
+SELECT
+    t.juxiang,
+    t.yingfu,
+    t.cq_cust_name,
+    t.prod_id,
+    t.lanzhuang_staff,
+    t.year_id,
+    SUM(t.sr_income_aftertax) AS sr_income_aftertax
+FROM (
+    -- 2023 年
+    SELECT
+        inc.juxiang,
+        inc.yingfu,
+        inc.cq_cust_name,
+        inc.prod_id,
+        inc.lanzhuang_staff,
+        &#x27;23&#x27;                          AS year_id,
+        inc.confirm_income_aftertax   AS sr_income_aftertax
+    FROM ads_yz_quanliang_kemu_income inc
+    JOIN (
+        SELECT DISTINCT due_income_code23 AS due_income_code
+        FROM ads_yz_zqb_xc_due_income_code_dim_list
+        WHERE due_income_code23 IS NOT NULL
+          AND due_income_code23 &lt;&gt; &#x27;&#x27;
+    ) d
+      ON inc.due_income_code = d.due_income_code
+    WHERE inc.year_id = &#x27;2023&#x27;
+
+    UNION ALL
+
+    -- 2024 年
+    SELECT
+        inc.juxiang,
+        inc.yingfu,
+        inc.cq_cust_name,
+        inc.prod_id,
+        inc.lanzhuang_staff,
+        &#x27;24&#x27;                          AS year_id,
+        inc.confirm_income_aftertax   AS sr_income_aftertax
+    FROM ads_yz_quanliang_kemu_income inc
+    JOIN (
+        SELECT DISTINCT due_income_code24 AS due_income_code
+        FROM ads_yz_zqb_xc_due_income_code_dim_list
+        WHERE due_income_code24 IS NOT NULL
+          AND due_income_code24 &lt;&gt; &#x27;&#x27;
+    ) d
+      ON inc.due_income_code = d.due_income_code
+    WHERE inc.year_id = &#x27;2024&#x27;
+
+    UNION ALL
+
+    -- 2025 年
+    SELECT
+        inc.juxiang,
+        inc.yingfu,
+        inc.cq_cust_name,
+        inc.prod_id,
+        inc.lanzhuang_staff,
+        &#x27;25&#x27;                          AS year_id,
+        inc.confirm_income_aftertax   AS sr_income_aftertax
+    FROM ads_yz_quanliang_kemu_income inc
+    JOIN (
+        SELECT DISTINCT due_income_code25 AS due_income_code
+        FROM ads_yz_zqb_xc_due_income_code_dim_list
+        WHERE due_income_code25 IS NOT NULL
+          AND due_income_code25 &lt;&gt; &#x27;&#x27;
+    ) d
+      ON inc.due_income_code = d.due_income_code
+    WHERE inc.year_id = &#x27;2025&#x27;
+) t
+GROUP BY
+    t.juxiang,
+    t.yingfu,
+    t.cq_cust_name,
+    t.prod_id,
+    t.lanzhuang_staff,
+    t.year_id
+;
+</code></pre>
+              </details>
+            </div>
+            
+</section>
+<section class="eval" id="eval-pitfall-offer-dev">
+<h2>eval-pitfall-offer-dev · 销售品发展量明细——14 条反模式 <small class="tier">medium</small></h2>
+
+            <div class="group">
+              <div class="group-header">
+                <h3>With Skill</h3>
+                <span class="score ok">得分 100% · 通过 10/10 · 必过失败 0 · 状态 pass</span>
+              </div>
+              <details>
+                <summary>查看断言明细</summary>
+                <table class="assertions">
+                  <thead><tr><th>ID</th><th>描述</th><th>等级</th><th>结果</th><th>备注</th></tr></thead>
+                  <tbody><tr class="pass"><td>P1-main-table</td><td>041 生产表名</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>P1-action-id</td><td>action_id IN (1292,6200)</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>P1-exclude-cancel</td><td>排除撤单作废（subs_stat_reason NOT IN 1200/1300，允许 COALESCE 包装）</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>P1-offer-code</td><td>销售品编码 YD0202-556</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 1 处</td></tr><tr class="pass"><td>P1-period</td><td>两个账期 202509/202510</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>P1-city-id-200</td><td>销售品维表必加 city_id=200</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>P1-no-zh-status</td><td>状态不写中文</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr><tr class="pass"><td>P1-jg-as-flag-col</td><td>竣工标志位/时间作输出列（CASE WHEN ... AS ...），不作 WHERE 过滤（软规则）</td><td>软规则</td><td><span class="badge pass">PASS</span></td><td>命中 1 处</td></tr><tr class="pass"><td>P1-no-zh-placeholder</td><td>SQL 字面量禁尖括号/编号占位</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr><tr class="pass"><td>P1-no-select-star</td><td>禁 SELECT *</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr></tbody>
+                </table>
+              </details>
+              <details>
+                <summary>查看生成的 SQL（2021 字符）</summary>
+                <pre><code>-- 按销售品编码 YD0202-556 取 202509/202510 月发展量明细
+-- 主表：dwm_yz_rpt_comm_ba_msdisc_final（041 优惠订单表）
+-- 关键口径（VC-20260428-001）：
+--   动作：action_id IN (1292, 6200)  -- 1292 订购、6200 销售品互换
+--   排除撤单作废：COALESCE(subs_stat_reason,&#x27;-1&#x27;) NOT IN (&#x27;1200&#x27;,&#x27;1300&#x27;)
+--   竣工默认输出标记列与竣工时间，不进 WHERE：CASE WHEN subs_stat=&#x27;301200&#x27; ...
+-- 销售品编码 -&gt; ID：补 020 销售品维表 dws_offer，必须 city_id=200
+-- 划小局向名称：041.subst_id -&gt; 018 dwd_yz_dim_org（levs=3）
+-- 揽装局向名称：041.salestaff_subst_id -&gt; 018 dwd_yz_dim_org（levs=3）
+SELECT
+    a.acc_nbr                                                AS acc_nbr,
+    a.cust_name                                              AS cust_name,
+    a.sales_code                                             AS sales_code,
+    a.sales_man_name                                         AS sales_man_name,
+    CASE WHEN a.subs_stat = &#x27;301200&#x27; THEN a.subs_stat_date END AS jg_date,
+    CASE WHEN a.subs_stat = &#x27;301200&#x27; THEN 1 ELSE 0 END       AS is_jg,
+    f.prod_offer_code                                        AS prod_offer_code,
+    f.offer_name                                             AS offer_name,
+    a.subst_id                                               AS subst_id,
+    hx_subst.org_name                                        AS subst_name,
+    a.salestaff_subst_id                                     AS salestaff_subst_id,
+    lz_subst.org_name                                        AS salestaff_subst_name,
+    date_format(a.subs_stat_date, &#x27;yyyyMM&#x27;)                  AS dev_month
+FROM dwm_yz_rpt_comm_ba_msdisc_final a
+JOIN dws_crm_cfguse.dws_offer f
+    ON a.prod_offer_id = f.offer_id
+   AND f.city_id = 200
+   AND f.prod_offer_code = &#x27;YD0202-556&#x27;
+LEFT JOIN dwd_yz_dim_org hx_subst
+    ON a.subst_id = hx_subst.org_id
+   AND hx_subst.levs = 3
+LEFT JOIN dwd_yz_dim_org lz_subst
+    ON a.salestaff_subst_id = lz_subst.org_id
+   AND lz_subst.levs = 3
+WHERE a.action_id IN (1292, 6200)
+  AND COALESCE(a.subs_stat_reason, &#x27;-1&#x27;) NOT IN (&#x27;1200&#x27;, &#x27;1300&#x27;)
+  AND date_format(a.subs_stat_date, &#x27;yyyyMM&#x27;) IN (&#x27;202509&#x27;, &#x27;202510&#x27;);
+</code></pre>
+              </details>
+            </div>
+            
+
+            <div class="group">
+              <div class="group-header">
+                <h3>Without Skill</h3>
+                <span class="score bad">得分 50% · 通过 5/10 · 必过失败 4 · 状态 fail</span>
+              </div>
+              <details>
+                <summary>查看断言明细</summary>
+                <table class="assertions">
+                  <thead><tr><th>ID</th><th>描述</th><th>等级</th><th>结果</th><th>备注</th></tr></thead>
+                  <tbody><tr class="fail-must"><td>P1-main-table</td><td>041 生产表名</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="fail-must"><td>P1-action-id</td><td>action_id IN (1292,6200)</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="fail-must"><td>P1-exclude-cancel</td><td>排除撤单作废（subs_stat_reason NOT IN 1200/1300，允许 COALESCE 包装）</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="pass"><td>P1-offer-code</td><td>销售品编码 YD0202-556</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 1 处</td></tr><tr class="pass"><td>P1-period</td><td>两个账期 202509/202510</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="fail-must"><td>P1-city-id-200</td><td>销售品维表必加 city_id=200</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="pass"><td>P1-no-zh-status</td><td>状态不写中文</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr><tr class="fail-soft"><td>P1-jg-as-flag-col</td><td>竣工标志位/时间作输出列（CASE WHEN ... AS ...），不作 WHERE 过滤（软规则）</td><td>软规则</td><td><span class="badge fail-soft">FAIL-SOFT</span></td><td>未命中</td></tr><tr class="pass"><td>P1-no-zh-placeholder</td><td>SQL 字面量禁尖括号/编号占位</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr><tr class="pass"><td>P1-no-select-star</td><td>禁 SELECT *</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr></tbody>
+                </table>
+              </details>
+              <details>
+                <summary>查看生成的 SQL（629 字符）</summary>
+                <pre><code>-- 销售品 YD0202-556 在 202509、202510 月发展量明细
+-- 输出字段：号码、客户名、揽装人、竣工时间、划小局向、揽装局向
+SELECT
+    f.acc_nbr            AS acc_nbr,             -- 号码
+    f.cust_name          AS cust_name,           -- 客户名
+    f.lanzhuang_staff    AS lanzhuang_staff,     -- 揽装人
+    f.finish_time        AS finish_time,         -- 竣工时间
+    f.huaxiao_juxiang    AS huaxiao_juxiang,     -- 划小局向
+    f.lanzhuang_juxiang  AS lanzhuang_juxiang    -- 揽装局向
+FROM ads_yz_quanyewu_haoma_dingdan f
+WHERE f.month_id IN (&#x27;202509&#x27;, &#x27;202510&#x27;)
+  AND f.offer_code = &#x27;YD0202-556&#x27;
+  AND f.is_dev = &#x27;1&#x27;                              -- 发展（新装/新增）
+  AND f.finish_time IS NOT NULL
+;
+</code></pre>
+              </details>
+            </div>
+            
+</section>
+<section class="eval" id="eval-state-output">
+<h2>eval-state-output · 种子 serv_id 当月 state + 上月销售品在档 <small class="tier">medium</small></h2>
+
+            <div class="group">
+              <div class="group-header">
+                <h3>With Skill</h3>
+                <span class="score ok">得分 100% · 通过 11/11 · 必过失败 0 · 状态 pass</span>
+              </div>
+              <details>
+                <summary>查看断言明细</summary>
+                <table class="assertions">
+                  <thead><tr><th>ID</th><th>描述</th><th>等级</th><th>结果</th><th>备注</th></tr></thead>
+                  <tbody><tr class="pass"><td>T1-seed</td><td>驱动种子表</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>T1-069-table</td><td>069 取当月状态</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>T1-state-field</td><td>字段 state（而非 is_cancel_user）</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 3 处</td></tr><tr class="pass"><td>T1-no-is-cancel</td><td>默认不应误用 is_cancel_user 替代 state（软规则）</td><td>软规则</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr><tr class="pass"><td>T1-attr-id</td><td>字典 attr_id=4000000201</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>T1-attr-value-name</td><td>中文状态字段</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>T1-014-table</td><td>014 优惠资料表（在档）</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>T1-not-041</td><td>禁用 041（动作表）替代在档</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr><tr class="pass"><td>T1-202605</td><td>当月账期</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 6 处</td></tr><tr class="pass"><td>T1-202604</td><td>上月账期</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 3 处</td></tr><tr class="pass"><td>T1-offer-code</td><td>销售品编码 YD0202-556</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr></tbody>
+                </table>
+              </details>
+              <details>
+                <summary>查看生成的 SQL（1502 字符）</summary>
+                <pre><code>-- 种子 serv_id（ads_zqzw_chaiji_sxf_20260517）+ 当月 202605 状态（含中文）+ 上月 202604 销售品在档（YD0202-556）
+-- 模板：verified-cases/VC-20260520-002
+-- 主表与口径：
+--   当月状态：dwm_yz_tb_comm_cm_all_final（069），par_month_id=202605，字段 state（码值）
+--   状态中文名：dws_crm_cfguse.dws_attr_value，attr_id=&#x27;4000000201&#x27;，attr_value=cast(state as string) -&gt; attr_value_name
+--   上月销售品在档：ads_yz_rpt_comm_cm_msdisc_final（014），par_month_id=202604 + prod_offer_code=&#x27;YD0202-556&#x27;
+--   014 一对多：先按 serv_id 聚合后再 JOIN，避免放大
+WITH last_month_offer AS (
+    SELECT
+        serv_id,
+        MAX(prod_offer_name) AS prod_offer_name
+    FROM ads_yz_rpt_comm_cm_msdisc_final
+    WHERE par_month_id = 202604
+      AND prod_offer_code = &#x27;YD0202-556&#x27;
+    GROUP BY serv_id
+)
+SELECT
+    s.serv_id                                                AS serv_id,
+    cm.acc_nbr                                               AS acc_nbr,
+    cm.state                                                 AS state_code,
+    av.attr_value_name                                       AS state_name,
+    CASE WHEN o.serv_id IS NOT NULL THEN 1 ELSE 0 END        AS has_offer_last_month,
+    o.prod_offer_name                                        AS prod_offer_name
+FROM ads_zqzw_chaiji_sxf_20260517 s
+LEFT JOIN dwm_yz_tb_comm_cm_all_final cm
+    ON s.serv_id = cm.serv_id
+   AND cm.par_month_id = 202605
+LEFT JOIN dws_crm_cfguse.dws_attr_value av
+    ON av.attr_id = &#x27;4000000201&#x27;
+   AND av.attr_value = CAST(cm.state AS string)
+LEFT JOIN last_month_offer o
+    ON s.serv_id = o.serv_id;
+</code></pre>
+              </details>
+            </div>
+            
+
+            <div class="group">
+              <div class="group-header">
+                <h3>Without Skill</h3>
+                <span class="score bad">得分 55% · 通过 6/11 · 必过失败 5 · 状态 fail</span>
+              </div>
+              <details>
+                <summary>查看断言明细</summary>
+                <table class="assertions">
+                  <thead><tr><th>ID</th><th>描述</th><th>等级</th><th>结果</th><th>备注</th></tr></thead>
+                  <tbody><tr class="pass"><td>T1-seed</td><td>驱动种子表</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="fail-must"><td>T1-069-table</td><td>069 取当月状态</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="fail-must"><td>T1-state-field</td><td>字段 state（而非 is_cancel_user）</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="pass"><td>T1-no-is-cancel</td><td>默认不应误用 is_cancel_user 替代 state（软规则）</td><td>软规则</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr><tr class="fail-must"><td>T1-attr-id</td><td>字典 attr_id=4000000201</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="fail-must"><td>T1-attr-value-name</td><td>中文状态字段</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="fail-must"><td>T1-014-table</td><td>014 优惠资料表（在档）</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="pass"><td>T1-not-041</td><td>禁用 041（动作表）替代在档</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr><tr class="pass"><td>T1-202605</td><td>当月账期</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 7 处</td></tr><tr class="pass"><td>T1-202604</td><td>上月账期</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 4 处</td></tr><tr class="pass"><td>T1-offer-code</td><td>销售品编码 YD0202-556</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 1 处</td></tr></tbody>
+                </table>
+              </details>
+              <details>
+                <summary>查看生成的 SQL（1222 字符）</summary>
+                <pre><code>-- 种子表 ads_zqzw_chaiji_sxf_20260517 内的 serv_id：
+-- 1) 当月 202605 的状态（含中文描述）
+-- 2) 上月 202604 是否有销售品 YD0202-556 在档
+SELECT
+    s.serv_id                                                  AS serv_id,
+    s.acc_nbr                                                  AS acc_nbr,
+    cur.state_code                                             AS state_code_202605,
+    CASE cur.state_code
+        WHEN &#x27;F0&#x27; THEN &#x27;正常&#x27;
+        WHEN &#x27;F1&#x27; THEN &#x27;欠停&#x27;
+        WHEN &#x27;F2&#x27; THEN &#x27;挂停&#x27;
+        WHEN &#x27;F3&#x27; THEN &#x27;违章停机&#x27;
+        WHEN &#x27;F4&#x27; THEN &#x27;拆机&#x27;
+        WHEN &#x27;F5&#x27; THEN &#x27;预销户&#x27;
+        WHEN &#x27;F9&#x27; THEN &#x27;销户&#x27;
+        ELSE &#x27;其他/未知&#x27;
+    END                                                        AS state_name_202605,
+    CASE WHEN pre.serv_id IS NOT NULL THEN &#x27;是&#x27; ELSE &#x27;否&#x27; END    AS has_offer_yd0202_556_202604
+FROM ads_zqzw_chaiji_sxf_20260517 s
+LEFT JOIN (
+    -- 当月 202605 状态：取全业务资料表
+    SELECT
+        serv_id,
+        state_code
+    FROM ads_yz_quanyewu_ziliao
+    WHERE month_id = &#x27;202605&#x27;
+) cur
+  ON s.serv_id = cur.serv_id
+LEFT JOIN (
+    -- 上月 202604 是否在档 YD0202-556
+    SELECT DISTINCT
+        serv_id
+    FROM ads_yz_xiaoshoupin_zaidang_list
+    WHERE month_id = &#x27;202604&#x27;
+      AND offer_code = &#x27;YD0202-556&#x27;
+) pre
+  ON s.serv_id = pre.serv_id
+;
+</code></pre>
+              </details>
+            </div>
+            
+</section>
+<section class="eval" id="eval-table-routing">
+<h2>eval-table-routing · 双线/互联网专线明细——069 优先 <small class="tier">medium</small></h2>
+
+            <div class="group">
+              <div class="group-header">
+                <h3>With Skill</h3>
+                <span class="score ok">得分 100% · 通过 7/7 · 必过失败 0 · 状态 pass</span>
+              </div>
+              <details>
+                <summary>查看断言明细</summary>
+                <table class="assertions">
+                  <thead><tr><th>ID</th><th>描述</th><th>等级</th><th>结果</th><th>备注</th></tr></thead>
+                  <tbody><tr class="pass"><td>R1-069-table</td><td>主表 069</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 1 处</td></tr><tr class="pass"><td>R1-prod-type2</td><td>prod_type2 IN 60/70/71</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>R1-par-month</td><td>账期 202605</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>R1-speed</td><td>包含速率字段</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 4 处</td></tr><tr class="pass"><td>R1-yz-cs-or-033</td><td>月租通常补 033 的 yz_cs（软规则）</td><td>软规则</td><td><span class="badge pass">PASS</span></td><td>命中 5 处</td></tr><tr class="pass"><td>R1-no-zh-placeholder</td><td>SQL 字面量禁尖括号/编号占位</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr><tr class="pass"><td>R1-no-select-star</td><td>禁 SELECT *</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr></tbody>
+                </table>
+              </details>
+              <details>
+                <summary>查看生成的 SQL（1397 字符）</summary>
+                <pre><code>-- 双线/互联网专线号码 202605 当月速率与月租明细
+-- 双线定义：069.prod_type2 IN (60, 70, 71)  -- 60 互联网专线，70/71 组网专线
+-- 速率：069 主路径自带 speed_value
+-- 月租：069 缺该字段，按 acc_nbr + par_month_id 补 033 双线全量清单 ads_yz_sx_qlyz_list.yz_cs
+-- 033 同号码同月可能多行，按 load_date 取最新一行去重
+SELECT
+    a.acc_nbr                                       AS acc_nbr,
+    a.serv_id                                       AS serv_id,
+    a.par_month_id                                  AS par_month_id,
+    a.prod_type2                                    AS prod_type2,
+    CASE a.prod_type2
+        WHEN 60 THEN &#x27;互联网专线&#x27;
+        WHEN 70 THEN &#x27;组网专线&#x27;
+        WHEN 71 THEN &#x27;组网专线&#x27;
+    END                                             AS prod_type2_desc,
+    a.speed_value                                   AS speed_value,
+    sx.yz_cs                                        AS yz_cs,
+    a.subst_name                                    AS subst_name,
+    a.branch_name                                   AS branch_name
+FROM dwm_yz_tb_comm_cm_all_final a
+LEFT JOIN (
+    SELECT
+        acc_nbr,
+        par_month_id,
+        yz_cs,
+        speed_value,
+        ROW_NUMBER() OVER (PARTITION BY acc_nbr, par_month_id ORDER BY load_date DESC) AS rn
+    FROM ads_yz_sx_qlyz_list
+    WHERE par_month_id = 202605
+) sx
+    ON a.acc_nbr = sx.acc_nbr
+   AND a.par_month_id = sx.par_month_id
+   AND sx.rn = 1
+WHERE a.par_month_id = 202605
+  AND a.prod_type2 IN (60, 70, 71);
+</code></pre>
+              </details>
+            </div>
+            
+
+            <div class="group">
+              <div class="group-header">
+                <h3>Without Skill</h3>
+                <span class="score bad">得分 29% · 通过 2/7 · 必过失败 4 · 状态 fail</span>
+              </div>
+              <details>
+                <summary>查看断言明细</summary>
+                <table class="assertions">
+                  <thead><tr><th>ID</th><th>描述</th><th>等级</th><th>结果</th><th>备注</th></tr></thead>
+                  <tbody><tr class="fail-must"><td>R1-069-table</td><td>主表 069</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="fail-must"><td>R1-prod-type2</td><td>prod_type2 IN 60/70/71</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="fail-must"><td>R1-par-month</td><td>账期 202605</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="fail-must"><td>R1-speed</td><td>包含速率字段</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="fail-soft"><td>R1-yz-cs-or-033</td><td>月租通常补 033 的 yz_cs（软规则）</td><td>软规则</td><td><span class="badge fail-soft">FAIL-SOFT</span></td><td>未命中</td></tr><tr class="pass"><td>R1-no-zh-placeholder</td><td>SQL 字面量禁尖括号/编号占位</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr><tr class="pass"><td>R1-no-select-star</td><td>禁 SELECT *</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr></tbody>
+                </table>
+              </details>
+              <details>
+                <summary>查看生成的 SQL（797 字符）</summary>
+                <pre><code>-- 双线 / 互联网专线 号码：202605 当月的速率与月租明细
+-- 业务范围：移动+宽带双线 或 互联网专线（含商客专线）
+SELECT
+    f.acc_nbr           AS acc_nbr,            -- 号码
+    f.cust_name         AS cust_name,
+    f.prod_id           AS prod_id,            -- 产品
+    f.prod_name         AS prod_name,
+    f.biz_type          AS biz_type,           -- 业务大类：双线/专线
+    f.access_rate       AS access_rate,        -- 接入速率
+    f.rate_unit         AS rate_unit,          -- 速率单位（M/G）
+    f.monthly_rent      AS monthly_rent,       -- 月租
+    f.zhongduan_juxiang AS zhongduan_juxiang,  -- 局向
+    f.start_date        AS start_date,
+    f.end_date          AS end_date
+FROM ads_yz_quanyewu_ziliao f
+WHERE f.month_id = &#x27;202605&#x27;
+  AND (
+        f.biz_type IN (&#x27;双线&#x27;, &#x27;互联网专线&#x27;)
+     OR f.prod_kind_code IN (&#x27;SX&#x27;, &#x27;IPLINE&#x27;, &#x27;ZX&#x27;)            -- 双线/专线产品大类
+  )
+;
+</code></pre>
+              </details>
+            </div>
+            
+</section>
+<section class="eval" id="eval-ambiguous">
+<h2>eval-ambiguous · 129+ 宽带入网量按县分营服汇总 <small class="tier">medium</small></h2>
+
+            <div class="group">
+              <div class="group-header">
+                <h3>With Skill</h3>
+                <span class="score ok">得分 100% · 通过 10/10 · 必过失败 0 · 状态 pass</span>
+              </div>
+              <details>
+                <summary>查看断言明细</summary>
+                <table class="assertions">
+                  <thead><tr><th>ID</th><th>描述</th><th>等级</th><th>结果</th><th>备注</th></tr></thead>
+                  <tbody><tr class="pass"><td>A1-069-table</td><td>069 主表（生产名或视图）</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>A1-prod-type</td><td>宽带 prod_type=40</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>A1-kd-desc</td><td>kd_desc=&#x27;普通宽带&#x27;</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>A1-rh-129</td><td>融合套餐档 rh_tc_value&gt;=129</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>A1-is-rh-ykj</td><td>融合一卡机 is_rh_ykj=1</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 2 处</td></tr><tr class="pass"><td>A1-branch</td><td>按营服汇总（branch_name/id）</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 3 处</td></tr><tr class="pass"><td>A1-group-by</td><td>GROUP BY 汇总</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 1 处</td></tr><tr class="pass"><td>A1-no-channel</td><td>默认不用揽装营服字段（软规则）</td><td>软规则</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr><tr class="pass"><td>A1-no-zh-placeholder</td><td>SQL 字面量禁尖括号/编号占位（普通宽带等正常字面量允许）</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr><tr class="pass"><td>A1-no-select-star</td><td>禁 SELECT *</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr></tbody>
+                </table>
+              </details>
+              <details>
+                <summary>查看生成的 SQL（943 字符）</summary>
+                <pre><code>-- 标准指标命中：M-BASIC-BB-004 129+宽带入网数
+-- 主表：dwm_yz_tb_comm_cm_all_final（069 全业务资料表，日表）
+-- 技术口径（来源：metrics/基本面/M-BASIC-BB-004_129+宽带入网数.md）：
+--   par_month_id = ${month_id}
+--   is_cancel_user = 0
+--   prod_type = 40
+--   kd_desc = &#x27;普通宽带&#x27;
+--   mainstream_net_type = 10
+--   is_cz = 1
+--   COALESCE(kd_prod_offer_id,&#x27;-1&#x27;) NOT LIKE &#x27;%500046067%&#x27;  -- 剔除快捷宽带主账号
+--   rh_tc_value &gt;= 129 AND is_rh_ykj = 1                     -- 融合 129+
+-- 用户未给账期，留 ${month_id} 占位
+-- 县分=subst_name（划小分局），营服=branch_name（划小营服，默认非揽装营服）
+SELECT
+    par_month_id,
+    subst_name,
+    branch_name,
+    COUNT(DISTINCT serv_id) AS bb_129_cnt
+FROM dwm_yz_tb_comm_cm_all_final
+WHERE par_month_id = ${month_id}
+  AND is_cancel_user = 0
+  AND prod_type = 40
+  AND kd_desc = &#x27;普通宽带&#x27;
+  AND mainstream_net_type = 10
+  AND is_cz = 1
+  AND COALESCE(kd_prod_offer_id, &#x27;-1&#x27;) NOT LIKE &#x27;%500046067%&#x27;
+  AND rh_tc_value &gt;= 129
+  AND is_rh_ykj = 1
+GROUP BY par_month_id, subst_name, branch_name;
+</code></pre>
+              </details>
+            </div>
+            
+
+            <div class="group">
+              <div class="group-header">
+                <h3>Without Skill</h3>
+                <span class="score bad">得分 40% · 通过 4/10 · 必过失败 6 · 状态 fail</span>
+              </div>
+              <details>
+                <summary>查看断言明细</summary>
+                <table class="assertions">
+                  <thead><tr><th>ID</th><th>描述</th><th>等级</th><th>结果</th><th>备注</th></tr></thead>
+                  <tbody><tr class="fail-must"><td>A1-069-table</td><td>069 主表（生产名或视图）</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="fail-must"><td>A1-prod-type</td><td>宽带 prod_type=40</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="fail-must"><td>A1-kd-desc</td><td>kd_desc=&#x27;普通宽带&#x27;</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="fail-must"><td>A1-rh-129</td><td>融合套餐档 rh_tc_value&gt;=129</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="fail-must"><td>A1-is-rh-ykj</td><td>融合一卡机 is_rh_ykj=1</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="fail-must"><td>A1-branch</td><td>按营服汇总（branch_name/id）</td><td>必过</td><td><span class="badge fail-must">FAIL-MUST</span></td><td>未命中</td></tr><tr class="pass"><td>A1-group-by</td><td>GROUP BY 汇总</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>命中 1 处</td></tr><tr class="pass"><td>A1-no-channel</td><td>默认不用揽装营服字段（软规则）</td><td>软规则</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr><tr class="pass"><td>A1-no-zh-placeholder</td><td>SQL 字面量禁尖括号/编号占位（普通宽带等正常字面量允许）</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr><tr class="pass"><td>A1-no-select-star</td><td>禁 SELECT *</td><td>必过</td><td><span class="badge pass">PASS</span></td><td>未命中（符合预期）</td></tr></tbody>
+                </table>
+              </details>
+              <details>
+                <summary>查看生成的 SQL（646 字符）</summary>
+                <pre><code>-- 129+ 宽带入网量，按县分营服汇总
+-- 口径推测：主宽新装且主套餐月承诺消费 &gt;= 129 元
+SELECT
+    f.county_name                            AS county_name,        -- 县
+    f.yingfu_name                            AS yingfu_name,        -- 营服
+    COUNT(DISTINCT f.acc_nbr)                AS dev_cnt_129plus     -- 129+ 宽带入网量
+FROM ads_yz_kuandai_xinzhuang_list f
+WHERE f.month_id = &#x27;${month_id}&#x27;
+  AND f.is_zhukuan = &#x27;1&#x27;                                            -- 主宽
+  AND f.is_dev = &#x27;1&#x27;                                                -- 新装/入网
+  AND f.main_offer_fee &gt;= 129                                       -- 主套餐承诺消费 &gt;= 129 元
+GROUP BY
+    f.county_name,
+    f.yingfu_name
+;
+</code></pre>
+              </details>
+            </div>
+            
+</section>
+
+</body>
+</html>
