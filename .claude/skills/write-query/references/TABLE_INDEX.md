@@ -24,7 +24,7 @@
 | 销售品名称、销售品编码补全 | 020 销售品维表视图 | 用 `offer_id` 补 `offer_name` 等 | 不要作为事实主表 |
 | 销售品参数、折扣、赠金、统付金额补全 | 107 销售品参数表 | 按 `serv_id + prod_offer_id + param_code` 补 `param_value` | 不要用它判断销售品是否在档；在档仍先用 014 |
 | 号码订单动作 | 040 全业务号码订单表 | 号码级受理、变更、订单动作 | 不要用 069 代替动作事实 |
-| 收入类 | 047 最终版划小收入；048 全量科目级收入；097 基本面月清单；101 台阶收入清单 | 划小收入、科目收入、基本面、台阶收入 | 不要用 069 的状态字段推收入 |
+| 收入类 | 047 最终版划小收入；048 全量科目级收入；097 基本面月清单；101 台阶收入清单 | 划小收入、科目收入、基本面、台阶收入；最新月科目收入可用 `dwm_srhx_src_income_list` | 不要用 069 的状态字段推收入 |
 | 积分类 | 007 净增积分清单；012 发展存量积分清单；081 揽装积分清单；082 双线净增积分清单；091 财务部积分多维表 | 积分明细、积分汇总、财务积分 | 不要混用不同积分口径 |
 | 续约类 | 030 移动续约清单；032 宽带续约清单；065 双线续约清单；096 酒宽续约清单 | 移动/宽带/双线/酒店宽带续约 | 不要用新装或订单表替代续约事实 |
 | 降档/升降档 | 008/009 129+套餐升降档路径；010 降档原始清单；011 降档动作订单清单；104 降档清单 | 升降档路径、降档动作、降档明细 | 先区分路径、多维、动作、结果 |
@@ -88,7 +88,7 @@
 | 042 | 号码协销表 | zone_gz_yz.dwd_yz_cm_obj_xx_final | zone_gz_yz.dwd_yz_cm_obj_xx_final | tables/042_号码协销表.md |  |  | 号码协销表相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
 | 043 | 订单协销表 | zone_gz_yz.dwd_yz_ba_obj_xx_final | zone_gz_yz.dwd_yz_ba_obj_xx_final | tables/043_订单协销表.md |  |  | 订单协销表相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
 | 047 | 最终版划小收入 | dwm_srhx_serv_list_mon | dwm_srhx_serv_list_mon | tables/047_最终版划小收入.md |  |  | 最终版划小收入相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
-| 048 | 全量科目级收入 | dwm_srhx_src_income_list_mon | dwm_srhx_src_income_list_mon | tables/048_全量科目级收入.md | 服务/号码级科目收入明细 | par_month_id | 全量科目级收入、按 SR 科目/due_income_code 取税后收入 sum(fee_all) | 字段名相似但业务事实不在本表时不要选；划小收入汇总用 047 |
+| 048 | 全量科目级收入 | dwm_srhx_src_income_list_mon | dwm_srhx_src_income_list_mon | tables/048_全量科目级收入.md | 服务/号码级科目收入明细 | month_id | 全量科目级收入、按 SR 科目/due_income_code 取税后收入 sum(fee_all)；最新月表 `dwm_srhx_src_income_list` 只放最新收入月份 | 字段名相似但业务事实不在本表时不要选；划小收入汇总用 047；历史月/多账期用 `_mon` |
 | 049 | 欠费日清单 | ads_ys_lst_qf_pushdata_daily_bss | ads_ys_lst_qf_pushdata_daily_bss | tables/049_欠费日清单.md |  |  | 欠费日清单相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
 | 050 | 宽带到达套餐收入清单 | zone_gz_yz.ads_yz_kddd_tcsr_list | zone_gz_yz.ads_yz_kddd_tcsr_list | tables/050_宽带到达套餐收入清单.md |  | par_month_id | 宽带到达套餐收入清单相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
 | 051 | 小业务收入多维表 | zone_gz_yz.ads_yz_ict_all_ydxyw_sr_LIST | zone_gz_yz.ads_yz_ict_all_ydxyw_sr_LIST | tables/051_小业务收入多维表.md |  | par_month_id | 小业务收入多维表相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |

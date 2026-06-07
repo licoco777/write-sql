@@ -162,7 +162,8 @@ runtime: true
 | 到达 / 在网 / 出账规模 | 069 全业务资料表 | 标准指标文件指定表 | 新装清单、订单表 | 存量状态优先 069 |
 | 商企/政企入网量 | 069 全业务资料表 | 022 商企入网清单；036 政企移动入网清单 | 直接按客群名切专项表 | 问“量/规模”默认 069；明确要商企/政企专项清单字段时再用专项表 |
 | 双线数据 / 互联网专线 / 组网专线 | 069 全业务资料表 `dwm_yz_tb_comm_cm_all_final` | 033 双线全量清单补月租 `yz_cs`、双线专项字段；已补 033 时也可取 033 `speed_value` | 只因要双线速率就切到 033 | 双线定义看 069 `prod_type2 IN (60,70,71)`；速率 069/033 均可，按查询主路径选择 |
-| 全量科目级收入 / 按 SR 科目取税后收入 | 048 全量科目级收入 `dwm_srhx_src_income_list_mon` | 用户科目维表（如 `due_income_code23/24/25` 分列） | 047（无 `due_income_code`）、069 收入标志 | 分区 **`par_month_id`**；度量 `sum(fee_all)`；详见 `verified-cases/VC-20260520-001` |
+| 全量科目级收入 / 按 SR 科目取税后收入 | 048 全量科目级收入 `dwm_srhx_src_income_list_mon` | 用户科目维表（如 `due_income_code23/24/25` 分列） | 047（无 `due_income_code`）、069 收入标志 | 账期字段 **`month_id`**；最新月可用 `dwm_srhx_src_income_list`，历史月/多账期用 `_mon`；度量 `sum(fee_all)`；详见 `verified-cases/VC-20260520-001` |
+| 项目/客户号码圈定后查账目项收入明细 | 069 全业务资料表先圈 `serv_id` | 048 全量科目级收入取 SR 科目、收入来源、账目项、税后收入 | 069 的 `fee` / `fee_new_tax` 直接当账目项明细 | 先按客户名、产品分类、号码清单等在 069 圈服务标识，再按 `serv_id + month_id` 查 048；用户要 `due_income_name/due_type/data_src_name/col_income_name/acct_item_type_name/fee_all` 时走此路径 |
 | 划小收入 | 047 最终版划小收入 | 指标 SQL 指定表 | 069 | 收入事实表优先 |
 | 基本面收入 | 097 基本面月清单 | 指标 SQL 指定表 | 069 | A0 税后等以收入口径为准 |
 | 台阶收入 | 101 台阶收入清单 | - | 其它收入表 | 专项收入口径 |

@@ -47,6 +47,7 @@ runtime: true
 | 直销客户编码 / 客户编码 | `ccust_id`、`cust_code`、`cust_id`、`cust_nbr` | 主表候选字段语义无法确认时先不补表 | - | 先列候选字段请用户确认 | 最容易混用直销客户和产权客户 |
 | 销售品编码 / 名称 | `prod_offer_id`、`kd_prod_offer_id` | 主表只有销售品 ID | 020 销售品维表 | `主表.prod_offer_id = offer.offer_id`；`offer.city_id=200` | 不加城市会错配 |
 | 折扣 / 赠金 / 统付金额 / 销售品参数值 | 014 `prod_offer_id`、`serv_id` | 014 能确认在档销售品和到期时间，但缺具体参数值 | 107 销售品参数表 `summary_ods_day_city.rpt_comm_cm_msparam` | `serv_id + prod_offer_id + param_code`；固定 `par_corp_id='200'`；必要时按 `limit_date` 过滤有效期 | `param_code` 必须来自用户、产品口径或已验证案例；不要猜参数编码；不要用参数表判断销售品是否在档 |
+| SR科目名称 / SR科目路径 / 收入来源 / 计费收入科目 / 账目项 / 税后收入明细 | 069 `serv_id`、`acc_nbr`、客户/产品属性 | 先按项目、客户名、产品分类、号码清单等条件圈定对象，再要科目级收入明细 | 048 全量科目级收入 `dwm_srhx_src_income_list_mon`；最新月可用 `dwm_srhx_src_income_list` | `069.serv_id = 048.serv_id` 且账期一致；048 账期字段用 `month_id`；取 `due_income_name/due_type/data_src_name/col_income_name/acct_item_type_name/fee_all` | 048 是科目/账目项明细，一户一月可能多行；输出明细不随意去重，汇总时按输出维度 `sum(fee_all)` |
 | 产品名称 | `prod_id` | 主表只有产品 ID | 017 产品维表 | `主表.prod_id = product.prod_id` | 先确认产品维表字段名 |
 | 主体编码 / 主体名称 | `channel_nbr`、`channel_id`、`channel_name` | 需求要网点归属经营主体 | 021 揽装网点维表 | 优先 `主表.channel_nbr = 021.channel_nbr`；无 `channel_nbr` 再用 `channel_id` | 021 可能同一网点多人员，补表前按网点键去重 |
 | 划小县分 / 营服名称 | `subst_id`、`branch_id`、`subst_name`、`branch_name` | 主表只有 ID 无名称 | 018 机构维表 | `org_id` 关联；分局 `levs=3`，营服 `levs=4` | 不要用维表 `subst_id/branch_id` 当机构 ID |
