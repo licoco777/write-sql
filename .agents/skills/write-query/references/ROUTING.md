@@ -80,6 +80,7 @@ runtime: true
 | 销售品 / offer | 销售品 | 041 优惠订单表（动作）；014 优惠资料表（存量） | `prod_offer_id`，维表 `dws_offer.offer_id` | 销售品维表必加 `city_id=200` |
 | 销售品发展量 | 订购 + 销售品互换 | 041 优惠订单表 | `action_id IN (1292, 6200)`，排除撤单作废 | 不要选专项产品清单 |
 | 销售品在档 / 有没有套餐 | 销售品存量 | 014 优惠资料表 | `serv_id + par_month_id + prod_offer_code`；名称 `prod_offer_name` | 「有没有」≠ 041 订购动作 |
+| 销售品参数 / 折扣 / 赠金 / 统付金额 | 销售品参数值 | 069 补 `serv_id` → 014 锁在档销售品 → 107 销售品参数表补 `param_value` | `serv_id + prod_offer_id + param_code`；`par_corp_id='200'` | 查参数值才补 107；不要用 107 判断是否在档；`param_code` 不要猜 |
 | 新装 / 入网 | 新入网规模 | 069 全业务资料表 | `is_new_user=1`、`open_date`、`subs_id` | 宽带、移动、固话及其它产品入网量默认都走 069 |
 | 到达 / 在网 / 出账 | 存量状态 | 069 全业务资料表 | `is_cz`、`is_cancel_user`、`is_online_user` | 规模类口径；**用户说「状态」见下行** |
 | 状态 / 号码状态 / 用户状态 | 服务状态码 + 中文名 | 069 全业务资料表 | **`state`**（码值）；中文 **`dws_attr_value.attr_value_name`**（`attr_id='4000000201'`） | **默认字段是 `state`，不是 `is_cancel_user` 等**；交付需 **码值 + 中文名**；详见 `FIELD_BACKFILL.md`、`VC-20260520-002` |
@@ -153,6 +154,7 @@ runtime: true
 | 标准指标 | `METRIC_INDEX.md` 命中表 + 单指标 SQL | 表文档中同 Hive 名表 | 经验路由覆盖指标 SQL | 指标技术口径优先 |
 | 销售品发展量 / 订购动作 | 041 优惠订单表 `dwm_yz_rpt_comm_ba_msdisc_final` | 020 销售品维表补编码/名称 | 燃气卫士、视联网、FTTR 等专项清单 | 动作事实在优惠订单表 |
 | 销售品存量 / 在档 | 014 优惠资料表 `ads_yz_rpt_comm_cm_msdisc_final` | 020 销售品维表 | 041 优惠订单表 | 订单是动作，不是存量；「有没有某销售品」走 014 |
+| 销售品参数 / 折扣 / 赠金 / 统付金额 | 014 优惠资料表（先锁在档销售品） | 069 补 `serv_id`；107 销售品参数表补 `param_value` | 041 优惠订单表；107 直接当主表 | 号码清单 → 069 补 `serv_id` → 014 查在档销售品和 `limit_date` → 107 按 `serv_id + prod_offer_id + param_code` 补参数值；广州固定 `par_corp_id='200'` |
 | 种子 serv_id + 当月状态 + 上月销售品在档 | 用户种子表（驱动）+ 069（当月 `state`） | 014（上月 `prod_offer_code`）；字典表（`state` 中文） | 041（动作≠在档） | 双账期：`par_month_id` 当月/上月分开；详见 `verified-cases/VC-20260520-002` |
 | 种子 serv_id + 拆机前一月产品规格/附属产品属性（宽表） | 用户种子表（驱动）+ 069 **月表**（逻辑拆机月） | 105 特性月表 + 106 附属产品月表（`attr_month_id=拆机月-1`）；字典（特性中文） | 特性/附属日表（只在网）；069 日表（回溯场景）；105/106 混用 | 双账期 + 多 `attr_id` 宽表；详见 `verified-cases/VC-20260522-001` |
 | 任意产品入网量 / 新装量 | 069 全业务资料表 `dwm_yz_tb_comm_cm_all_final` | 001/006 等专项新装清单仅作专项字段补充 | 仅因产品名切专项表 | 宽带、移动、固话及其它产品入网量默认都走 069 |

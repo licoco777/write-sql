@@ -46,6 +46,7 @@ runtime: true
 | 产品入网量 / 到达量条件 | `prod_type`、`kd_desc`、`is_new_user`、`open_date`、`par_month_id` | 069 字段满足时不补表 | - | 直接在 069 写过滤条件 | 不要按产品词切专项清单 |
 | 直销客户编码 / 客户编码 | `ccust_id`、`cust_code`、`cust_id`、`cust_nbr` | 主表候选字段语义无法确认时先不补表 | - | 先列候选字段请用户确认 | 最容易混用直销客户和产权客户 |
 | 销售品编码 / 名称 | `prod_offer_id`、`kd_prod_offer_id` | 主表只有销售品 ID | 020 销售品维表 | `主表.prod_offer_id = offer.offer_id`；`offer.city_id=200` | 不加城市会错配 |
+| 折扣 / 赠金 / 统付金额 / 销售品参数值 | 014 `prod_offer_id`、`serv_id` | 014 能确认在档销售品和到期时间，但缺具体参数值 | 107 销售品参数表 `summary_ods_day_city.rpt_comm_cm_msparam` | `serv_id + prod_offer_id + param_code`；固定 `par_corp_id='200'`；必要时按 `limit_date` 过滤有效期 | `param_code` 必须来自用户、产品口径或已验证案例；不要猜参数编码；不要用参数表判断销售品是否在档 |
 | 产品名称 | `prod_id` | 主表只有产品 ID | 017 产品维表 | `主表.prod_id = product.prod_id` | 先确认产品维表字段名 |
 | 主体编码 / 主体名称 | `channel_nbr`、`channel_id`、`channel_name` | 需求要网点归属经营主体 | 021 揽装网点维表 | 优先 `主表.channel_nbr = 021.channel_nbr`；无 `channel_nbr` 再用 `channel_id` | 021 可能同一网点多人员，补表前按网点键去重 |
 | 划小县分 / 营服名称 | `subst_id`、`branch_id`、`subst_name`、`branch_name` | 主表只有 ID 无名称 | 018 机构维表 | `org_id` 关联；分局 `levs=3`，营服 `levs=4` | 不要用维表 `subst_id/branch_id` 当机构 ID |

@@ -22,6 +22,7 @@
 | 销售品订购、互换、发展量动作 | 041 优惠订单表 | 按销售品统计发展量、动作明细 | 不要选 014 优惠资料表或专项产品清单 |
 | 销售品存量、在档 | 014 优惠资料表 | 查询某销售品当前/账期在档用户 | 不要选 041 订单动作表 |
 | 销售品名称、销售品编码补全 | 020 销售品维表视图 | 用 `offer_id` 补 `offer_name` 等 | 不要作为事实主表 |
+| 销售品参数、折扣、赠金、统付金额补全 | 107 销售品参数表 | 按 `serv_id + prod_offer_id + param_code` 补 `param_value` | 不要用它判断销售品是否在档；在档仍先用 014 |
 | 号码订单动作 | 040 全业务号码订单表 | 号码级受理、变更、订单动作 | 不要用 069 代替动作事实 |
 | 收入类 | 047 最终版划小收入；048 全量科目级收入；097 基本面月清单；101 台阶收入清单 | 划小收入、科目收入、基本面、台阶收入 | 不要用 069 的状态字段推收入 |
 | 积分类 | 007 净增积分清单；012 发展存量积分清单；081 揽装积分清单；082 双线净增积分清单；091 财务部积分多维表 | 积分明细、积分汇总、财务积分 | 不要混用不同积分口径 |
@@ -136,3 +137,4 @@
 | 104 | 降档清单 | ads_yz_jd_list | ads_yz_jd_list | tables/104_降档清单.md |  | par_month_id | 降档清单相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
 | 105 | 特性资料表 | summary_ods_day_city.tb_pre_cm_attr_all | summary_ods_day_city.tb_pre_cm_attr_all（日表）；iodata_ods_month_city.tb_pre_cm_attr_all_mon（月表） | tables/105_特性资料表.md | serv_id + attr_id；月表按 par_month_id 快照 | par_corp_id, par_month_id | **产品规格**属性/特性值；历史或拆机前月快照 | 日表只在网；附属产品走 106 |
 | 106 | 附属产品资料表 | summary_ods_day_city.rpt_comm_cm_subserv | summary_ods_day_city.rpt_comm_cm_subserv（日表）；iodata_ods_month_city.rpt_comm_cm_subserv_mon（月表） | tables/106_附属产品资料表.md | serv_id + attr_id；月表按 par_month_id 快照 | par_corp_id, par_month_id | **附属产品**属性/特性值；历史或拆机前月快照 | 日表只在网；产品规格走 105 |
+| 107 | 销售品参数表 | summary_ods_day_city.rpt_comm_cm_msparam | summary_ods_day_city.rpt_comm_cm_msparam | tables/107_销售品参数表.md | serv_id + prod_offer_id + param_code（以生产表为准） | par_corp_id | 销售品参数值补全；用户问折扣、赠金、统付金额、优惠参数等，先由 069/014 锁定 `serv_id` 与 `prod_offer_id` 后补 `param_value` | 不要作为销售品在档事实表；在档/到期时间先查 014；`param_code` 不可猜 |
