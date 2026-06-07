@@ -1,0 +1,4 @@
+interface:
+  display_name: "SQL案例沉淀"
+  short_description: "逐案确认并沉淀SQL案例知识到技能"
+  default_prompt: "Use $sql-case-sedimentation to analyze one SQL case and confirm what should be沉淀进 write-query."
