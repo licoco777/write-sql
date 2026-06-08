@@ -95,7 +95,8 @@ runtime: true
 | 划小局向 / 划小分局 | 号码归属机构（落到划小） | 069 / 040 / 041 等主表机构字段 | `subst_id`、`subst_name`、`branch_id`、`branch_name` | 与落地局向不同 |
 | 落地局向 / 标准落地局向 | 标准落地机构 | 主表机构字段（与划小并行） | `std_subst_id`、`std_subst_name`、`std_branch_id`、`std_branch_name` | 与划小不同，谨慎区分用户语义 |
 | 客户名 | 客户名称 | 041/022 自带不脱敏；069 脱敏 | 041/022 `cust_name`；069 `cust_name_tm` | 公众客群可能仅 069 有 |
-| 装机地址 / 接入号装机地址 | 标准地址中文名 | 069 + 079 地址维表 | `serv_addr_id` → `dwd_yz_addr_final.id`；锁 `grade=10` | 默认 `grade=10`；脱敏取 `tm_addr_name` |
+| 装机地址 / 接入号装机地址 | 标准地址中文名 | 069 + 079 地址维表 | `serv_addr_id` → `dwd_yz_addr_final.id`；锁 `grade=10` | 默认 `grade=10`；脱敏取 `tm_addr_name`；地址 ID 关联统一转字符，禁止默认把 `serv_addr_id` 强转 decimal |
+| 7级地址 / 地址层级 / 装机地址上级地址 | 标准装机地址所属 7 级地址 ID/名称 | 069 全业务资料表 → 079 地址维表 | 069 `serv_addr_id` → 079 `id` → `addr_id_7` → 079 `id`；第二次关联锁 `grade=7` | 附件号码清单先按 `acc_nbr + par_month_id` 定位 069；地址 ID 关联统一转字符，避免长地址 ID 转 decimal 漏数 |
 | 在网 / 在用 | 在网状态 | 069 | `is_cancel_user=0` / `is_online_user=1` | 不同口径定义不同 |
 | 出账 | 当月出账 | 069 | `is_cz=1`（当月） / `is_cz_last=1`（上月） | 月维度判断 |
 | 融合 | 融合套餐 | 069 | `rh_type_ykj` / `is_rh_ykj=1` / `rh_tc_id` / `rh_tc_value` | 严口径见 metrics |

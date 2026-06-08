@@ -69,7 +69,7 @@
 | 019 | 移动主套餐维表视图 | metadata_ods_day.tb_dim_cdma_disc_type | metadata_ods_day.tb_dim_cdma_disc_type | tables/019_移动主套餐维表视图.md |  |  | 移动主套餐维表视图相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
 | 020 | 销售品维表视图 | dws_crm_cfguse.dws_offer | dws_crm_cfguse.dws_offer | tables/020_销售品维表视图.md |  |  | 销售品维表视图相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
 | 021 | 揽装所属表（旧编号） | zone_gz_yz.dwd_yz_sales_man_outlers_final | zone_gz_yz.dwd_yz_sales_man_outlers_final | tables/021_揽装网点维表.md | 有效揽装人 + 有效网点对应关系（旧文档名保留兼容） |  | 旧编号兼容；新查询优先看 113 揽装所属表、111 揽装人维表、112 网点维表 | 不要当纯网点维表；网点唯一信息看 112 |
-| 079 | 地址维表 | zone_gz_yz.dwd_yz_addr_final | zone_gz_yz.dwd_yz_addr_final | tables/079_地址维表.md | 以 id 为地址粒度；grade 表示地址层级 |  | 地址 / 装机地址相关取数；主业务表取 `serv_addr_id` 后按 `CAST(serv_addr_id AS DECIMAL(24,0)) = id` 关联，装机地址默认 `grade=10` | 字段名相似但业务事实不在本表时不要选 |
+| 079 | 地址维表 | zone_gz_yz.dwd_yz_addr_final | zone_gz_yz.dwd_yz_addr_final | tables/079_地址维表.md | 以 id 为地址粒度；grade 表示地址层级 |  | 地址 / 装机地址 / 7级地址相关取数；主业务表取 `serv_addr_id` 后统一转字符关联 `id`，装机地址默认 `grade=10`，7 级地址按 `addr_id_7` 二次关联 `grade=7` | 字段名相似但业务事实不在本表时不要选；不要把 `serv_addr_id` 默认强转 decimal |
 | 022 | 商企入网清单 | zone_gz_yz.ads_yz_shangqi_rw_list | zone_gz_yz.ads_yz_shangqi_rw_list | tables/022_商企入网清单.md |  | par_month_id | 商企入网清单相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
 | 023 | 基础业务托收清单 | zone_gz_yz.ads_yz_tb_cl_tuoshou_list | zone_gz_yz.ads_yz_tb_cl_tuoshou_list | tables/023_基础业务托收清单.md |  | par_month_id | 基础业务托收清单相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |
 | 024 | 营业厅月度订单受理量清单 | zone_gz_yz.ads_yz_yyt_sl_list | zone_gz_yz.ads_yz_yyt_sl_list | tables/024_营业厅月度订单受理量清单.md |  |  | 营业厅月度订单受理量清单相关取数；先按表文档字段和常用条件核对 | 字段名相似但业务事实不在本表时不要选 |

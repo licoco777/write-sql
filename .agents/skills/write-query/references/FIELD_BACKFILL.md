@@ -62,6 +62,7 @@ runtime: true
 | 网点有效性 | 用户网点清单 `channel_nbr/channel_id` | 诊断网点为什么无号码/收入，或确认网点是否有效 | 112 网点月表 `zone_gz_yz.dwd_yz_sale_outlers_mon_final` | 按 `par_month_id` + `channel_nbr/channel_id` 查；`status_cd='S0X'` 为无效 | 网点无效不会出现在 113 有效对应表里；不要只看 113 缺失就断言网点不存在 |
 | 揽装人有效性 | 113 或 111 `staff_id` | 诊断有效网点下是否无有效揽装人，或揽装人是否无效 | 111 揽装人月表 `zone_gz_yz.dwd_yz_sales_man_mon_final` | 用 `staff_id` 关联；`status_cd='S0X'` 为无效；历史账期按 `par_month_id` 对齐 | `sales_code` 不唯一，禁止作为揽装人唯一 JOIN 键 |
 | 国际漫游开通权限 / 国漫开通时间 / IMSI | 069 `acc_nbr` | 用户要判断号码是否开通国际漫游权限，或输出开通国漫权限时间、G/L IMSI | 114 国际漫游数据表 `dws_ctg.dws_mktag_download_share_guoman_label` | `069.acc_nbr = 114.msisdn`；按用户指定统计日过滤 `114.yyyymmdd`；`reserv2` 为开通国漫权限时间 | `yyyymmdd` 是日分区/统计日，不是 069 账期；同一号码多日可能多行，未指定日期时需确认取最新还是取区间 |
+| 7 级地址 ID / 7 级地址名称 | 069 `serv_addr_id` | 用户给号码/宽带/接入号清单，要回填标准装机地址所属 7 级地址 | 079 地址维表 `zone_gz_yz.dwd_yz_addr_final` | 先按 `附件.acc_nbr = 069.acc_nbr` 且 `069.par_month_id=${month_id}` 取 `serv_id/serv_addr_id`；再 `069.serv_addr_id = cast(addr.id as string)` 取 `addr.addr_id_7`；最后 `cast(addr.addr_id_7 as string)=cast(addr7.id as string)` 且 `addr7.grade=7` 取 `addr7.addr` | `serv_addr_id` 是字符型，地址维表 `id/addr_id_7` 是 decimal；禁止默认 `cast(serv_addr_id as decimal(24,0))`，长地址 ID 可能转换失败或漏数；附件驱动需核对输入/命中/输出行数 |
 | 揽装机构 | `salestaff_subst_id`、`salestaff_branch_id` | 主表只有机构 ID | 018 机构维表 | 分局 `salestaff_subst_id = org_id AND levs=3`；营服 `salestaff_branch_id = org_id AND levs=4` | 多次 JOIN 要检查别名 |
 | 双线速率 | 069 `speed_value`；033 `speed_value` | 主路径已在 069 时不补表；已补 033 或用户指定双线清单口径时可取 033 | 033 双线全量清单（可选） | 若补 033，按 `acc_nbr + par_month_id` 关联 | 不要只为速率强行补 033；两边均可取时跟随主路径 |
 | 双线月租 | 033 `yz_cs` | 069 不提供双线月租或用户明确要月租 | 033 双线全量清单 | `主表.acc_nbr = 033.acc_nbr` 且 `主表.par_month_id = 033.par_month_id` | 033 同号码同月可能多行，必要时按 `load_date` 去重 |
@@ -108,6 +109,13 @@ runtime: true
 
 - 主表 069。
 - 069 已有 `par_month_id`、`subst_name`、`branch_name` 时不补机构维表。
+
+### 号码清单补 7 级地址 ID 和名称
+
+- 主表保持 069，按附件号码和 `par_month_id` 取 `serv_id`、`serv_addr_id`。
+- 地址层级补 079 地址维表：`069.serv_addr_id = cast(addr.id as string)`，再用 `addr.addr_id_7` 二次关联 079，`addr7.grade=7` 取 `addr7.addr`。
+- 地址 ID 关联统一转字符；不要把 `069.serv_addr_id` 强转为 `decimal(24,0)`。
+- 附件驱动时保留附件号码/序号，并核对附件行数、命中行数、输出行数。
 
 ### 双线速率和月租
 
