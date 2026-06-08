@@ -31,6 +31,7 @@
 | 客户实体映射 / 客户信息维护 | 108 产权客户全量表；109 直销客户表 | 签订/维护直销客户；通过产权客户找直销客户；按客户信息更新客户资料 | 号码/服务明细要客户名、产权客户名、直销客户名时，优先用 069 或当前事实主表自带客户字段 |
 | 机构、销售员、协销补字段 | 018 机构维表；111 揽装人维表；112 网点维表；113 揽装所属表；042 号码协销表；043 订单协销表 | 补机构层级、销售员、协销人、网点经营主体 | 不要作为默认主表 |
 | 结算账单 / 合同网点 | 110 结算账单表；111 揽装人维表；112 网点维表；113 揽装所属表 | 结算报账、合同编码、合同账期、合同下网点、网点有效性、有效揽装人 | 不要用 069、订单表、积分表承接合同结算事实 |
+| 国际漫游开通 | 114 国际漫游数据表 | 已开通国际漫游权限号码、开户时间、开通国漫权限时间、G/L IMSI | 不要用漫游结算收入表或订单表推断是否开通国漫 |
 | 字典/码值中文名 | 015 字典表视图；016 字典维表视图 | 编码转中文、属性值解释 | 不要把码值表当业务事实表 |
 | 产品规格属性 / 特性历史快照 | 105 特性资料表 | 拆机前月主产品特性、历史某月 attr_id 特性值 | 不要用特性日表查已拆机历史；勿与 106 混用 |
 | 附属产品属性 / 附属产品历史快照 | 106 附属产品资料表 | 拆机前月附属产品特性 | 不要用附属日表查已拆机历史；勿与 105 混用 |
@@ -146,3 +147,4 @@
 | 111 | 揽装人维表 | zone_gz_yz.dwd_yz_sales_man_final | zone_gz_yz.dwd_yz_sales_man_final；zone_gz_yz.dwd_yz_sales_man_mon_final | tables/111_揽装人维表.md | 揽装人粒度；日表唯一，月表按 `par_month_id` 快照 | par_month_id（月表） | 查揽装人信息、有效性、归属网点 `own_channel_id`；历史账期用月表 | `sales_code` 不唯一，不要作为揽装人唯一 JOIN / 去重键 |
 | 112 | 网点维表 | zone_gz_yz.dwd_yz_sale_outlers_final | zone_gz_yz.dwd_yz_sale_outlers_final；zone_gz_yz.dwd_yz_sale_outlers_mon_final | tables/112_网点维表.md | 网点粒度；日表唯一，月表按 `par_month_id` 快照 | par_month_id（月表） | 查网点编码、名称、有效性、经营主体及机构归属；历史账期用月表 | 不要把网点表当号码或收入事实表 |
 | 113 | 揽装所属表 | zone_gz_yz.dwd_yz_sales_man_outlers_final | zone_gz_yz.dwd_yz_sales_man_outlers_final；zone_gz_yz.dwd_yz_sales_man_outlers_mon_final | tables/113_揽装所属表.md | 有效揽装人 + 有效网点对应关系；月表按 `par_month_id` 快照 | par_month_id（月表） | 查有效网点下有效揽装人、合同网点实际工号数量、无号码收入网点诊断；优先用 `staff_id` 关联揽装人 | 只含有效组合；缺记录不等于网点不存在，需回查 111/112 判断无效或无揽装人 |
+| 114 | 国际漫游数据表 | dws_ctg.dws_mktag_download_share_guoman_label | dws_ctg.dws_mktag_download_share_guoman_label | tables/114_国际漫游数据表.md | 已开通国际漫游权限的号码日分区数据；号码粒度以 `msisdn + yyyymmdd` 为准 | yyyymmdd | 查已开通国际漫游权限号码、用户开户时间、开通国漫权限时间、G/L IMSI；常与 069 按号码补字段 | 不要当漫游收入或漫游使用行为表；`yyyymmdd` 是日分区/统计日，不是 069 账期 |

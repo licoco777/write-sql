@@ -88,6 +88,7 @@ runtime: true
 | 揽装 / 销售员 | 销售员及所属机构 | 主表自带，缺名称再补维表 | `sales_code`、`sales_man_name`、`salestaff_subst_id` | 机构维表用 `org_id + levs` |
 | 市场化承包合同 / 合同下实际工号 | 结算账单合同网点 + 有效揽装人 | 110 结算账单表 → 113 揽装所属表 | 110 `contractno/contract_name/billing_cycle_id/channel_id`；113 `staff_id/sales_code/sales_man_nbr/sales_man_name` | 账期用 `substr(billing_cycle_id,1,6)` 对齐月表；实际工号数量优先按 `staff_id` 去重 |
 | 无号码收入网点诊断 | 网点有效性 + 揽装人有效性 | 112 网点维表 + 113 揽装所属表 + 111 揽装人维表 | 112 `status_cd`；113 有效网点有效揽装人关系；111 `status_cd` | 113 只含有效组合；缺记录需回查 112/111 区分无效网点、有效网点无揽装人、揽装人无效 |
+| 国际漫游 / 国漫开通 | 国际漫游权限开通号码 | 069 圈号码范围 → 114 国际漫游数据表 | 114 `msisdn/reserv1/reserv2/reserv3/reserv4/yyyymmdd` | `yyyymmdd` 是日分区/统计日；不要与 069 `par_month_id` 混用 |
 | 营服 / 所属营服 | **划小营服**（默认） | 主表机构字段 | 048/047/069 等：`branch_id`、`branch_name` | 未特别声明「揽装营服」时，**不用** `channel_branch_name`；揽装营服需用户点名 |
 | 划小局向 / 划小分局 | 号码归属机构（落到划小） | 069 / 040 / 041 等主表机构字段 | `subst_id`、`subst_name`、`branch_id`、`branch_name` | 与落地局向不同 |
 | 落地局向 / 标准落地局向 | 标准落地机构 | 主表机构字段（与划小并行） | `std_subst_id`、`std_subst_name`、`std_branch_id`、`std_branch_name` | 与划小不同，谨慎区分用户语义 |
@@ -174,6 +175,7 @@ runtime: true
 | 台阶收入 | 101 台阶收入清单 | - | 其它收入表 | 专项收入口径 |
 | 市场化承包合同下有效揽装人 / 实际工号数量 | 110 结算账单表 `dws_tpss_jszx.dws_settle_bill` | 113 揽装所属表 `_mon_final`；必要时回查 112 网点维表、111 揽装人维表 | 069、订单表、积分表、收入明细表 | 合同、结算账期、网点事实在结算账单表；按 `channel_id + substr(billing_cycle_id,1,6)` 补有效网点下有效揽装人；实际工号数量用 `count(distinct staff_id)` |
 | 无号码收入网点诊断 | 112 网点维表 `_mon_final` | 113 揽装所属表 `_mon_final`；111 揽装人维表 `_mon_final` | 号码表、收入表直接反推网点有效性 | 按账期和网点清单先判断网点是否无效；有效网点在 113 无记录表示无有效揽装人关系，再回查 111 区分揽装人无效 |
+| 国际漫游开通号码 / 国漫权限 | 114 国际漫游数据表 `dws_ctg.dws_mktag_download_share_guoman_label` | 069 全业务资料表补客户、产品、局向等号码属性 | 漫游结算收入表、订单表 | 本表内号码为已开通国际漫游权限号码；按 `msisdn` 关联 069 `acc_nbr`，按 `yyyymmdd` 锁统计日 |
 | 移动续约 | 030 移动续约清单 | 031 移动续约多维表 | 新装/资料表 | 续约动作专项 |
 | 宽带续约 | 032 宽带续约清单 | 096 酒宽续约清单 | - | 按业务对象选 |
 | 双线续约 | 065 双线续约清单 | 033 双线全量清单 | - | 续约 vs 全量区分 |
