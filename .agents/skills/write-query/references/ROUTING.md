@@ -114,8 +114,10 @@ runtime: true
 | 固话使用记录 / 固话使用时长 | 固话月使用记录 | 116 | - | 勿用 069 替代；专项见 **§专项场景索引**（SC-003） |
 | 投诉号码匹配移机订单 / 移机成功订单 | 移机订单事实 | 118（移动号先 069 转宽带） | - | 勿用 069/投诉表替代；专项见 **§专项场景索引**（SC-004） |
 | 主副卡关系 / 副卡查主卡 | 移动副卡对应主卡号码 | 069 全业务资料表 | 附件副卡号码 = 069 `acc_nbr`；输出 `zk_acc_nbr` | 必须锁 `par_month_id`；移动号码建议加 `prod_type=30`；不默认加 `is_vice_card=1` |
-| 营服 / 所属营服 | **划小营服**（默认） | 主表机构字段 | 048/047/069 等：`branch_id`、`branch_name` | 未特别声明「揽装营服」时，**不用** `channel_branch_name`；揽装营服需用户点名 |
-| 划小局向 / 划小分局 | 号码归属机构（落到划小） | 069 / 040 / 041 等主表机构字段 | `subst_id`、`subst_name`、`branch_id`、`branch_name` | 与落地局向不同 |
+| 营服 / 所属营服 | **划小营服**（默认） | 主表机构字段 | 048/047/069 等：`branch_id`、`branch_name` | 默认「营服」= 号码划小营服；用户说**揽装营服**时，069 取 `channel_branch_name`（网点所属营服） |
+| 划小局向 / 划小分局 | 号码归属机构（落到划小） | 069 / 040 / 041 等主表机构字段 | `subst_id`、`subst_name`、`branch_id`、`branch_name` | 与落地局向、揽装机构均不同 |
+| 揽装分局 / 揽装局向 | 网点所属区县（069） | 069 全业务资料表 | `channel_subst_name` | 口语叫法有时不标准，即字段文档「网点所属区县」；≠ 划小分局 `subst_name`；订单表等用 `salestaff_subst_*` + 018 |
+| 揽装营服 | 网点所属营服（069） | 069 全业务资料表 | `channel_branch_name` | 口语叫法有时不标准，即字段文档「网点所属营服」；≠ 划小营服 `branch_name`；订单表等用 `salestaff_branch_*` + 018 |
 | 落地局向 / 标准落地局向 | 标准落地机构 | 主表机构字段（与划小并行） | `std_subst_id`、`std_subst_name`、`std_branch_id`、`std_branch_name` | 与划小不同，谨慎区分用户语义 |
 | 客户名 | 客户名称 | 041/022 自带不脱敏；069 脱敏 | 041/022 `cust_name`；069 `cust_name_tm` | 公众客群可能仅 069 有 |
 | 装机地址 / 接入号装机地址 | 标准地址中文名 | 069 + 079 地址维表 | `serv_addr_id` → `dwd_yz_addr_final.id`；锁 `grade=10` | 默认 `grade=10`；脱敏取 `tm_addr_name`；地址 ID 关联统一转字符，禁止默认把 `serv_addr_id` 强转 decimal |
@@ -165,8 +167,9 @@ runtime: true
 | 揽装人 / 销售员姓名 | `sales_man_name` 或 `sales_name` | 主表（041/069/040 等）自带；缺则查表 md |
 | 揽装人工号 | `sales_code` | 主表自带 |
 | 客户经理 CRM 编码 / 11 开头 CRM 工号 | `staff_account`（115；专项见 **§专项场景索引** SC-001） |
-| 揽装分局 / 揽装局向 | `salestaff_subst_id` / `salestaff_subst_name` | 主表 + 必要时补 018 机构维表（`levs=3`） |
-| 揽装营服 | `salestaff_branch_id` / `salestaff_branch_name` 或 `channel_branch_name` | 用户**明确点名揽装营服**时才用；默认营服走划小 |
+| 揽装分局 / 揽装局向 | **069**：`channel_subst_name`（网点所属区县）；**订单表等**：`salestaff_subst_id` / `salestaff_subst_name` + 018（`levs=3`） | 069 上口语「揽装分局」= 网点所属区县，可直接映射；与划小分局 `subst_name` 不同 |
+| 揽装营服 | **069**：`channel_branch_name`（网点所属营服）；**订单表等**：`salestaff_branch_id` / `salestaff_branch_name` + 018（`levs=4`） | 069 上口语「揽装营服」= 网点所属营服，可直接映射；与划小营服 `branch_name` 不同 |
+| 划小分局 / 划小营服 | `subst_name` / `branch_name`（及对应 ID） | 069 等主表自带；号码**归属**机构，非揽装网点机构 |
 | 受理人 / 受理工号 | `staff_id` / `staff_name` | 040 订单表常见 |
 | 协销人 | 协销字段（按订单键关联 042/043） | 069 通常缺；先补 040，再 042/043 |
 | 客户名（不脱敏） | 041/022 的 `cust_name` | 041 全客群、022 仅商企 |
