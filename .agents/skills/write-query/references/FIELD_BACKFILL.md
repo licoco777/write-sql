@@ -49,7 +49,7 @@ runtime: true
 | 产权客户编码 | 附件 `cust_name` | 客户实体映射/维护场景中，附件无产权客户编码，需按产权客户名称回填编码 | 108 产权客户全量表 `dws_crm_cust.dws_customer` | `附件.cust_name = 108.cust_name` → `cust_number` | 客户名可能重名或多命中；只作为无编码兜底，必须保留附件行标识；号码/服务明细要客户字段时优先用事实主表自带字段 |
 | 直销客户编码 / 直销客户名称 | 产权客户编码 `cust_nbr` | 用户明确要签订/维护直销客户，或通过产权客户找直销客户 | 109 直销客户表 `zone_gz_yz.dws_yz_tb_mo_custgrp_cust_final` | `附件或主表.cust_nbr = 109.cust_nbr` → `ccust_code/ccust_name` | 同一产权客户可能多条直销客户记录；回填前后核对行数；号码/服务明细要直销客户名时优先用 069 或当前事实主表自带字段 |
 | 销售品编码 / 名称 | `prod_offer_id`、`kd_prod_offer_id` | 主表只有销售品 ID | 020 销售品维表 | `主表.prod_offer_id = offer.offer_id`；`offer.city_id=200` | 不加城市会错配 |
-| 折扣 / 赠金 / 统付金额 / 销售品参数值 | 014 `prod_offer_id`、`serv_id` | 014 能确认在档销售品和到期时间，但缺具体参数值 | 107 销售品参数表 `summary_ods_day_city.rpt_comm_cm_msparam` | `serv_id + prod_offer_id + param_code`；固定 `par_corp_id='200'`；必要时按 `limit_date` 过滤有效期 | `param_code` 必须来自用户、产品口径或已验证案例；不要猜参数编码；不要用参数表判断销售品是否在档 |
+| 折扣 / 赠金 / 统付金额 / 销售品参数值 | 014 `prod_offer_id`、`serv_id` | 需具体 `param_value` 且 014 已锁在档销售品 | 107 销售品参数表 | 见下文 **§销售品参数值（107）** | 不要用 107 判断在档；`param_code` 不可猜 |
 | SR科目名称 / SR科目路径 / 收入来源 / 计费收入科目 / 账目项 / 税后收入明细 | 069 `serv_id`、`acc_nbr`、客户/产品属性 | 先按项目、客户名、产品分类、号码清单等条件圈定对象，再要科目级收入明细 | 048 全量科目级收入 `dwm_srhx_src_income_list_mon`；最新月可用 `dwm_srhx_src_income_list` | `069.serv_id = 048.serv_id` 且账期一致；048 账期字段用 `month_id`；取 `due_income_name/due_type/data_src_name/col_income_name/acct_item_type_name/fee_all` | 048 是科目/账目项明细，一户一月可能多行；输出明细不随意去重，汇总时按输出维度 `sum(fee_all)` |
 | 产品名称 | `prod_id` | 主表只有产品 ID | 017 产品维表 | `主表.prod_id = product.prod_id` | 先确认产品维表字段名 |
 | 主体编码 / 主体名称 | `channel_nbr`、`channel_id`、`channel_name` | 需求要网点归属经营主体 | 112 网点维表 | 优先 `主表.channel_nbr = 112.channel_nbr`；无 `channel_nbr` 再用 `channel_id`；历史账期用 `_mon_final + par_month_id` | 网点维表日表唯一；历史月按账期对齐，避免拿当前网点覆盖历史 |
@@ -75,6 +75,48 @@ runtime: true
 | **IMSI / 号码 IMSI** | 069 `acc_nbr` | 号码清单导 IMSI | **105 特性资料表** | → `SC-005` | 勿走 114 国漫表 |
 | **附属产品属性 / 附属产品特性值** | 主表通常无 | 用户要附属产品 `attr_id` 特性码值；历史/拆机前某月 | **106 附属产品资料表**（`tables/106_附属产品资料表.md`） | 月表 `iodata_ods_month_city.rpt_comm_cm_subserv_mon`：`serv_id` + `par_month_id` + `par_corp_id='200'` + `attr_id` | 勿与 105 混用；历史必须用月表 |
 | **特性值中文名** | `attr_value1`（码值） | 输出产品规格或附属产品属性且要中文 | **`dws_crm_cfguse.dws_attr_value`** | `a.attr_id=b.attr_id` AND `a.attr_value1=b.attr_inner_value` AND `b.city_id='200'` → **`attr_value_name`** | 用 **`attr_inner_value`**，不是 `state` 的 `attr_value`；105/106 通用 |
+
+## 销售品参数值（107）补表链路
+
+**单一事实源**：折扣、赠金、统付金额、销售品参数值等需求的补表步骤以本节为准；`ROUTING.md` 只保留主表判断（存量在档 → 014），`tables/107_销售品参数表.md` 只保留字段与示例 SQL。
+
+### 何时走本链路
+
+- 用户要的是 **参数值** `param_value`（折扣率、赠金金额、统付金额等），不是「有没有办理 / 是否在档 / 到期时间」。
+- 「是否在档 / 到期」→ **014 优惠资料表**（主表或补表），**不要用 107**。
+- 销售品 **订购 / 发展量动作** → **041**，不是本链路。
+
+### 主表与三步补表
+
+| 步骤 | 表 | 作用 |
+|------|-----|------|
+| 0（可选） | 069 全业务资料表 | 附件仅给 `acc_nbr` 时补 `serv_id`；锁 `par_month_id` |
+| 1 | 014 优惠资料表 `ads_yz_rpt_comm_cm_msdisc_final` | 锁账期在档销售品：`serv_id` + `par_month_id` + `prod_offer_id`；可取 `limit_date` |
+| 2 | 107 销售品参数表 `summary_ods_day_city.rpt_comm_cm_msparam` | 补 `param_value` |
+
+**ROUTING 主表判断**：销售品参数类需求的事实主路径为 **014（先锁在档）**；107 仅作补表，**禁止**把 107 当主表。041 是动作表，不用于查在档参数。
+
+### JOIN 键与过滤
+
+```sql
+-- 014 已得 serv_id、prod_offer_id 后
+left join summary_ods_day_city.rpt_comm_cm_msparam p
+  on msdisc.serv_id = p.serv_id
+ and msdisc.prod_offer_id = p.prod_offer_id
+ and p.param_code = ${param_code}   -- 必须来自用户/口径/案例，禁止猜测
+ and p.par_corp_id = '200'
+```
+
+- 广州固定 `par_corp_id = '200'`。
+- 需「仍有效」参数时，按需求过滤 `limit_date`（如 `limit_date >= 账期月底`）。
+- 同一 `serv_id + prod_offer_id` 可能多 `param_code`：明细保留多行，或按参数编码打宽表。
+
+### 风险与自检
+
+- `param_code` 未确认 → 先问用户，不要猜编码。
+- 用 107 判断销售品是否在档 → 错误，应查 014。
+- 用 041 查参数值 → 错误，041 是订单动作。
+- 自检：补 107 前后行数；多 `param_code` 时说明是否一对多膨胀。
 
 ## 补表确认输出模板
 
@@ -104,6 +146,8 @@ runtime: true
 | 号码清单导 IMSI | `scenarios/SC-005_号码清单导IMSI.md` |
 | 号码清单补 7 级/5 级地址 | `scenarios/SC-006_号码清单补地址层级.md` |
 | 市场化合同有效揽装人 / 无号码收入网点诊断 | `scenarios/SC-007_市场化合同有效揽装人.md` |
+| 117 实收 / 047 客户基本面·产数（附件·圈定·直查） | `scenarios/SC-009_047117收入实收查询.md` |
+| 种子 serv_id + 拆机前月产品规格/附属产品属性宽表 | `scenarios/SC-008_种子serv_id拆机前月属性宽表.md` |
 
 ### 069 新装 / 到达 / 拆机场景要协销人
 
@@ -155,14 +199,6 @@ runtime: true
 
 ### 种子 serv_id + 拆机前一月产品规格/附属产品属性
 
-- 驱动表：用户种子表（含 `serv_id`；可无拆机月）。
-- 拆机月：069 **月表** `dwm_yz_tb_comm_cm_all_mon_final`，默认 **逻辑拆机** `is_cancel_user=1`；`cancel_month_id = par_month_id`；多次拆机默认取最近 `hist_create_date`。
-- 属性月：`attr_month_id = cancel_month_id - 1`。
-- **产品规格属性**：105 特性资料**月表** `tb_pre_cm_attr_all_mon`；`par_month_id=attr_month_id` + `par_corp_id='200'` + `attr_id IN (...)`；宽表列前缀 `attr_{id}_*`。
-- **附属产品属性**：106 附属产品**月表** `rpt_comm_cm_subserv_mon`；同上分区与 JOIN 键；宽表列前缀 `subattr_{id}_*`（与规格属性区分，避免 attr_id 碰撞）。
-- **可同时取**：Step2 分别 LEFT JOIN 105 与 106 长表，Step3 宽表 pivot 合并。
-- 中文名：字典 `attr_value1 = attr_inner_value` + `city_id='200'`（105/106 通用）。
-- 多个 `attr_id` 默认 **宽表**；全程 LEFT JOIN 保种子行。
-- 详见 `verified-cases/VC-20260522-001`。
+- 完整流程见 `scenarios/SC-008_种子serv_id拆机前月属性宽表.md`；已验证 CTAS 实例见 `verified-cases/VC-20260522-001`。
 
 维护来源：精简自 `D_experience/field_backfill.md`。

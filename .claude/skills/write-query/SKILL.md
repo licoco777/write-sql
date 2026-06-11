@@ -30,6 +30,7 @@ description: 为 CDAP 电信业务数据分析平台编写、改写和审计 Hiv
 
 - `references/D_experience/_archive/*`：已归档的老经验层（`business_glossary`、`table_routing`、`cdap_global_rules`、`anti_patterns`、`field_backfill`）。内容已并入 `ROUTING.md` / `FIELD_BACKFILL.md` / `RULES.md`。
 - `references/D_experience/lessons_learned.md`：仅复盘日志，不参与运行时决策。
+- `references/MAINTENANCE.md`：知识库维护准则（维护者查阅），不参与运行时决策。
 - `references/verified-cases/*.md`（除 `INDEX.md` 外）：仅当用户需求与 `INDEX.md` 中某案例「适用」列高度匹配时再打开命中案例，不要批量预读。
 - `references/scenarios/*.md`（除 `INDEX.md` 外）：仅当用户需求与 `INDEX.md` 中某场景「适用」列高度匹配时再打开命中场景，不要批量预读。
 - 任何 `*-workspace/`：评测/迭代工作区，不属于运行时资产。
@@ -177,7 +178,7 @@ description: 为 CDAP 电信业务数据分析平台编写、改写和审计 Hiv
 
 ## 回填原则
 
-任务结束后只回填会复用、会影响正确性的经验：
+维护者完整落点表见 `references/MAINTENANCE.md`（运行时禁读）。任务结束后只回填会复用、会影响正确性的经验：
 
 - 新业务术语或选表经验：补 `references/ROUTING.md`（术语映射 / 主表路由表 / 术语→字段反查）。
 - 新字段补表规则：补 `references/FIELD_BACKFILL.md`。

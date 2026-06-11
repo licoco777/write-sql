@@ -12,31 +12,14 @@
 
 ## 快速定位
 
-先按业务事实选主表，再到下方完整索引查 `file_path`。
+本文件只做表名 / Hive 名 / `file_path` 查找。**主表路由决策见 `ROUTING.md`**；标准指标见 `METRIC_INDEX.md`；复杂专项见 `scenarios/INDEX.md`。
 
-| 用户需求类型 | 优先主表 | 典型用途 | 不要误选 |
-|---|---|---|---|
-| 任意产品入网量 / 新装量 / 到达量 | 069 全业务资料表 | 宽带、移动、固话及其它产品的入网量、到达量、规模统计 | 不要按产品名直接跳到专项新装清单 |
-| 全业务存量、在网、出账、常规状态规模 | 069 全业务资料表 | 服务级全业务明细、月末状态、常规规模统计 | 不要因为有订单字段就先选订单表 |
-| 移动/宽带新装专项明细 | 001 移动新装清单；006 宽带新装清单 | 仅当用户明确要专项新装清单字段、专项报表字段或专项清单口径时 | 不要覆盖 069 的常规全业务入网/到达口径 |
-| 销售品订购、互换、发展量动作 | 041 优惠订单表 | 按销售品统计发展量、动作明细 | 不要选 014 优惠资料表或专项产品清单 |
-| 销售品存量、在档 | 014 优惠资料表 | 查询某销售品当前/账期在档用户 | 不要选 041 订单动作表 |
-| 销售品名称、销售品编码补全 | 020 销售品维表视图 | 用 `offer_id` 补 `offer_name` 等 | 不要作为事实主表 |
-| 销售品参数、折扣、赠金、统付金额补全 | 107 销售品参数表 | 按 `serv_id + prod_offer_id + param_code` 补 `param_value` | 不要用它判断销售品是否在档；在档仍先用 014 |
-| 号码订单动作 | 040 全业务号码订单表 | 号码级受理、变更、订单动作 | 不要用 069 代替动作事实 |
-| 收入类 | 047 最终版划小收入；048 全量科目级收入；097 基本面月清单；101 台阶收入清单；117 实收来源汇总表 | 划小收入、科目收入、客户级基本面/产数收入、台阶收入、按号码/接入号查实收金额；最新月科目收入可用 `dwm_srhx_src_income_list` | 不要用 069 的状态字段推收入；实收金额不要误走 047/048 收入确认表 |
-| 积分类 | 012 发展存量积分清单；007 净增积分清单；081 揽装积分清单；082 双线净增积分清单；091 财务部积分多维表 | 积分类全量明细默认先看 012；专项指标/专项表明确时再看 007/081/082/091 | 不要把派生专项表当全量底表；不要仅因 `jz_points` 字段去 069 |
-| 续约类 | 030 移动续约清单；032 宽带续约清单；065 双线续约清单；096 酒宽续约清单 | 移动/宽带/双线/酒店宽带续约 | 不要用新装或订单表替代续约事实 |
-| 降档/升降档 | 008/009 129+套餐升降档路径；010 降档原始清单；011 降档动作订单清单；104 降档清单 | 升降档路径、降档动作、降档明细 | 先区分路径、多维、动作、结果 |
-| 客户实体映射 / 客户信息维护 | 108 产权客户全量表；109 直销客户表 | 签订/维护直销客户；通过产权客户找直销客户；按客户信息更新客户资料 | 号码/服务明细要客户名、产权客户名、直销客户名时，优先用 069 或当前事实主表自带客户字段 |
-| 机构、销售员、协销补字段 | 018 机构维表；111 揽装人维表；112 网点维表；113 揽装所属表；115 员工信息表；042 号码协销表；043 订单协销表 | 补机构层级、销售员、员工 CRM 工号、协销人、网点经营主体 | 不要作为默认主表 |
-| 结算账单 / 合同网点 | 110 结算账单表；111 揽装人维表；112 网点维表；113 揽装所属表 | 结算报账、合同编码、合同账期、合同下网点、网点有效性、有效揽装人 | 不要用 069、订单表、积分表承接合同结算事实 |
-| 国际漫游开通 | 114 国际漫游数据表 | 已开通国际漫游权限号码、开户时间、开通国漫权限时间、G/L IMSI | 不要用漫游结算收入表或订单表推断是否开通国漫 |
-| 固话使用记录 / 固话使用时长 | 116 固话使用记录月表 | 按固话号码清单查指定月份范围内的使用时长，`dur/60` 输出分钟 | 不要用 069 资料宽表替代使用记录事实；严格到日的截止需确认是否有日表 |
-| 投诉号码匹配移机订单 | 118 移机订单表 | 投诉归档日前后 N 天内是否存在移机成功订单，输出移机前后局向/营服/网格 | 不要用 069 或投诉清单表替代移机订单事实 |
-| 字典/码值中文名 | 015 字典表视图；016 字典维表视图 | 编码转中文、属性值解释 | 不要把码值表当业务事实表 |
-| 产品规格属性 / 特性历史快照 / IMSI | 105 特性资料表 | 拆机前月主产品特性、历史某月 attr_id 特性值、号码 IMSI（`attr_id='200000103'`） | 不要用特性日表查已拆机历史；勿与 106 混用；普通号码 IMSI 不要走 114 国漫表 |
-| 附属产品属性 / 附属产品历史快照 | 106 附属产品资料表 | 拆机前月附属产品特性 | 不要用附属日表查已拆机历史；勿与 105 混用 |
+| 查什么 | 去哪里 |
+|---|---|
+| 业务需求 → 主表怎么选 | `ROUTING.md` |
+| 标准指标 → 技术口径 SQL | `METRIC_INDEX.md` + `metrics/` |
+| 生产表名 / Hive 名 / 表文档路径 | 下方完整索引表 |
+| 附件驱动 / 跨表编排专项 | `scenarios/INDEX.md` |
 
 ## 选表输出要求
 
@@ -79,7 +62,7 @@
 |026|小微ict场景化收入数据|zone_gz_yz.ads_yz_scb_ict_fee_list|zone_gz_yz.ads_yz_scb_ict_fee_list|tables/026_小微ict场景化收入数据.md||par_month_id|-|-||
 |027|满卡报表清单|zone_gz_yz.ads_yz_mk_list|zone_gz_yz.ads_yz_mk_list|tables/027_满卡报表清单.md||par_month_id|-|-||
 |029|企微粉丝清单报表|zone_gz_yz.dwd_yz_qywx_daily_list_end|zone_gz_yz.dwd_yz_qywx_daily_list_end|tables/029_企微粉丝清单报表.md||par_month_id|-|-||
-|029|小微清单2024|zone_gz_yz.ads_yz_ict_all2024_LIST|zone_gz_yz.ads_yz_ict_all2024_LIST|tables/029_小微清单2024.md|以 serv_id / 客户维度为主的清单粒度（以实际报表为准）|par_month_id|-|-||
+|071|小微清单2024|zone_gz_yz.ads_yz_ict_all2024_LIST|zone_gz_yz.ads_yz_ict_all2024_LIST|tables/071_小微清单2024.md|以 serv_id / 客户维度为主的清单粒度（以实际报表为准）|par_month_id|-|-||
 |030|移动续约清单|ads_yz_ydxy_daily_list|ads_yz_ydxy_daily_list|tables/030_移动续约清单.md|||-|-||
 |031|移动续约多维表|ads_yz_ydxy_group|ads_yz_ydxy_group|tables/031_移动续约多维表.md|||-|-||
 |032|宽带续约清单|ads_yz_kd_xy_list|ads_yz_kd_xy_list|tables/032_宽带续约清单.md||par_month_id|-|-||
@@ -92,7 +75,7 @@
 | 041 | 优惠订单表 | zone_gz_yz.dwm_yz_rpt_comm_ba_msdisc_final | dwm_yz_rpt_comm_ba_msdisc_final | tables/041_优惠订单表.md | 订单粒度（subs_id 唯一） |  | 销售品发展量、订购、互换等订单动作 | 销售品在档/存量用 014 |
 |042|号码协销表|zone_gz_yz.dwd_yz_cm_obj_xx_final|zone_gz_yz.dwd_yz_cm_obj_xx_final|tables/042_号码协销表.md|||-|-||
 |043|订单协销表|zone_gz_yz.dwd_yz_ba_obj_xx_final|zone_gz_yz.dwd_yz_ba_obj_xx_final|tables/043_订单协销表.md|||-|-||
-| 047 | 最终版划小收入 | dwm_srhx_serv_list_mon | dwm_srhx_serv_list_mon_final | tables/047_最终版划小收入.md | 服务/月收入明细，可按 `cust_nbr` 汇总到客户级 | par_month_id | 划小收入、客户清单基本面收入 `fee_fm_new`、产数收入 `fee_cs`、按月打横收入取数 | 不要用 069 费用字段替代收入口径；单纯基本面明细专项口径可再核对 097 |
+| 047 | 最终版划小收入 | dwm_srhx_serv_list_mon | dwm_srhx_serv_list_mon_final | tables/047_最终版划小收入.md | 服务/月收入明细，可按 `cust_nbr` 汇总到客户级 | par_month_id | 划小收入、客户清单基本面/产数（`fee_fm_new`/`fee_cs`）；编排见 `scenarios/SC-009` | 不要用 069 费用字段替代；标准指标口径见 097/metrics |
 | 048 | 全量科目级收入 | dwm_srhx_src_income_list_mon | dwm_srhx_src_income_list_mon | tables/048_全量科目级收入.md | 服务/号码级科目收入明细 | month_id | 全量科目级收入、按 SR 科目/due_income_code 取税后收入 sum(fee_all)；最新月表 `dwm_srhx_src_income_list` 只放最新收入月份 | 字段名相似但业务事实不在本表时不要选；划小收入汇总用 047；历史月/多账期用 `_mon` |
 |049|欠费日清单|ads_ys_lst_qf_pushdata_daily_bss|ads_ys_lst_qf_pushdata_daily_bss|tables/049_欠费日清单.md|||-|-||
 |050|宽带到达套餐收入清单|zone_gz_yz.ads_yz_kddd_tcsr_list|zone_gz_yz.ads_yz_kddd_tcsr_list|tables/050_宽带到达套餐收入清单.md||par_month_id|-|-||
@@ -142,7 +125,7 @@
 |104|降档清单|ads_yz_jd_list|ads_yz_jd_list|tables/104_降档清单.md||par_month_id|-|-||
 | 105 | 特性资料表 | summary_ods_day_city.tb_pre_cm_attr_all | summary_ods_day_city.tb_pre_cm_attr_all（日表）；iodata_ods_month_city.tb_pre_cm_attr_all_mon（月表） | tables/105_特性资料表.md | serv_id + attr_id；月表按 par_month_id 快照 | par_corp_id, par_month_id | **产品规格**属性/特性值；历史或拆机前月快照；号码 IMSI 用 `attr_id='200000103'` 输出 `attr_value1` | 日表只在网；附属产品走 106；普通号码 IMSI 不要走 114 国漫表 |
 | 106 | 附属产品资料表 | summary_ods_day_city.rpt_comm_cm_subserv | summary_ods_day_city.rpt_comm_cm_subserv（日表）；iodata_ods_month_city.rpt_comm_cm_subserv_mon（月表） | tables/106_附属产品资料表.md | serv_id + attr_id；月表按 par_month_id 快照 | par_corp_id, par_month_id | **附属产品**属性/特性值；历史或拆机前月快照 | 日表只在网；产品规格走 105 |
-| 107 | 销售品参数表 | summary_ods_day_city.rpt_comm_cm_msparam | summary_ods_day_city.rpt_comm_cm_msparam | tables/107_销售品参数表.md | serv_id + prod_offer_id + param_code（以生产表为准） | par_corp_id | 销售品参数值补全；用户问折扣、赠金、统付金额、优惠参数等，先由 069/014 锁定 `serv_id` 与 `prod_offer_id` 后补 `param_value` | 不要作为销售品在档事实表；在档/到期时间先查 014；`param_code` 不可猜 |
+| 107 | 销售品参数表 | summary_ods_day_city.rpt_comm_cm_msparam | summary_ods_day_city.rpt_comm_cm_msparam | tables/107_销售品参数表.md | serv_id + prod_offer_id + param_code（以生产表为准） | par_corp_id | 补 `param_value`（折扣/赠金/统付等）；链路见 `FIELD_BACKFILL.md` §销售品参数值（107） | 不作在档主表；在档用 014；`param_code` 不可猜 |
 | 108 | 产权客户全量表 | dws_crm_cust.dws_customer | dws_crm_cust.dws_customer | tables/108_产权客户全量表.md | 产权客户粒度（以生产表为准） |  | 产权客户信息；按 `cust_name` 兜底补 `cust_number` | 客户名可能重名；有产权客户编码时优先编码匹配 |
 | 109 | 直销客户表 | zone_gz_yz.dws_yz_tb_mo_custgrp_cust_final | zone_gz_yz.dws_yz_tb_mo_custgrp_cust_final | tables/109_直销客户表.md | 产权客户到直销客户映射关系（以生产表为准） |  | 按 `cust_nbr` 补 `ccust_code`、`ccust_name`、机构 ID；机构名称再补 018 | 不要把机构 ID 字段脱离来源语义直接解释；可能一对多 |
 | 110 | 结算账单表 | dws_tpss_jszx.dws_settle_bill | dws_tpss_jszx.dws_settle_bill | tables/110_结算账单表.md | 结算账单 / 报账单粒度；包含合同、合作伙伴、网点、经营主体、金额和状态字段 | shard, billing_cycle_id | 结算账单、报账、合同编码、合作伙伴、网点、经营主体、支付/审核状态等取数；市场化承包合同下查网点和有效揽装人时作为合同网点事实来源 | 普通号码、服务、订单、积分或收入明细事实不要误选 |
@@ -152,5 +135,5 @@
 | 114 | 国际漫游数据表 | dws_ctg.dws_mktag_download_share_guoman_label | dws_ctg.dws_mktag_download_share_guoman_label | tables/114_国际漫游数据表.md | 已开通国际漫游权限的号码日分区数据；号码粒度以 `msisdn + yyyymmdd` 为准 | yyyymmdd | 查已开通国际漫游权限号码、用户开户时间、开通国漫权限时间、G/L IMSI；常与 069 按号码补字段 | 不要当漫游收入或漫游使用行为表；`yyyymmdd` 是日分区/统计日，不是 069 账期 |
 | 115 | 员工信息表 | dws_crm_cfguse.dws_staff | dws_crm_cfguse.dws_staff | tables/115_员工信息表.md | 员工信息粒度；同一员工编码可能存在历史多版本记录 |  | 按号码揽装人 `sales_code` 补员工姓名、员工标识、11 开头 CRM 工号 `staff_account`；常用 `city_id='200'` | 不要替代 111 判断揽装人有效性；历史多版本必须按 `status_date desc` 去重 |
 | 116 | 固话使用记录月表 | summary_ods_month_city.tb_comm_ywl_gw_mon | summary_ods_month_city.tb_comm_ywl_gw_mon | tables/116_固话使用记录月表.md | 固话号码月使用记录；号码 + 月份粒度（以生产表为准） | par_corp_id, par_month_id | 按固话号码清单查询月份范围内的使用时长；`dur/60` 输出分钟 | 不要用于固话资料状态、收入或订单动作；严格到日的截止需确认日级来源 |
-| 117 | 实收来源汇总表 | zone_gz_yz.dwd_yz_if_real_src_sum_new_final | zone_gz_yz.dwd_yz_if_real_src_sum_new_final | tables/117_实收来源汇总表.md | 号码/服务/月实收来源明细，可按 `acc_nbr`、`serv_id`、`par_month_id` 汇总 | par_month_id | 按号码、接入号或服务清单查询实收金额；实收口径为 `HF: amount-amount_tc`、`OT: amount`；常用于月份打横 | 不要与 047/048 税后收入、基本面/科目收入混用；VPN/专线范围若仅由附件提供，不要自动推导产品属性 |
+| 117 | 实收来源汇总表 | zone_gz_yz.dwd_yz_if_real_src_sum_new_final | zone_gz_yz.dwd_yz_if_real_src_sum_new_final | tables/117_实收来源汇总表.md | 号码/服务/月实收来源明细，可按 `acc_nbr`、`serv_id`、`par_month_id` 汇总 | par_month_id | 实收金额（附件/圈定/直查）；编排见 `scenarios/SC-009` | 不要与 047/048/069 混用 |
 | 118 | 移机订单表 | dwd_yz_rpt_comm_ba_subs_move_final | dwd_yz_rpt_comm_ba_subs_move_final | tables/118_移机订单表.md | 移机订单明细；以移机订单/接入号/竣工时间为核心粒度 | par_month_id | 投诉号码匹配移机订单、查询移机成功订单编码和竣工时间、输出移机前后局向/营服/网格 | 不要用于普通入网/到达规模；移动投诉号码需先按 069 融合套内宽带转换后再关联 |
