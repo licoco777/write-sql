@@ -28,6 +28,8 @@ source_file: "宽带.md"
 
 主宽入网数从 069 全业务资料表取数。
 
+**时间口径**：业务口语「按竣工时间」「竣工」在本指标上统一落 **`open_date`**（服务开通时间），即 `date_format(open_date,'yyyyMM')=${month_id}`；069 无订单竣工时间字段，**不要**用 `subs_stat_date`。
+
 过滤口径：
 
 - `par_month_id = ${month_id}`

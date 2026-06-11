@@ -188,6 +188,8 @@ description: 为 CDAP 电信业务数据分析平台编写、改写和审计 Hiv
 
 检索顺序：标准指标（`METRIC_INDEX` + 单指标文件）→ 主表附注 → `ROUTING.md` → verified case → 标注「未找到稳定口径」请用户确认。需展开时输出「业务口径确认」块（见分步确认协议 §4）。
 
+**主宽入网时间口径（固定，不必二选一确认）**：用户说「主宽入网 / 主宽入网量 / 主宽入网数」且主表为 069（含 M-BASIC-BB-001、M-BASIC-BB-002）时，即使用口语「按竣工时间」「竣工」，技术时间字段统一为 **`open_date`**（`date_format(open_date,'yyyyMM')`）；**不要**改用 `subs_stat_date` 或追问 `open_date` vs `subs_stat_date`。方案确认中写清：「用户口径：按竣工 → 指标技术字段：`open_date`」。仅当用户**明确**要订单竣工时间或主表非 069 时，才走订单表 `subs_stat_date`。
+
 ### 4. Column Linking / 字段映射
 
 只加载已确认主表的表文档。逐个输出：

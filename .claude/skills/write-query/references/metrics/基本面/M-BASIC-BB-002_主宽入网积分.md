@@ -36,7 +36,7 @@ source_file: "宽带.md"
 - `date_format(open_date, 'yyyyMM') = ${month_id}`
 - `prod_type = 40`
 
-与 [M-BASIC-BB-001 主宽入网数](M-BASIC-BB-001_主宽入网数.md) 的对象筛选一致（含 `prod_type = 40`）；本指标度量为 **`SUM(jz_points)`**，勿与 BB-001 的 `COUNT(serv_id)` 混用。
+与 [M-BASIC-BB-001 主宽入网数](M-BASIC-BB-001_主宽入网数.md) 的对象筛选一致（含 `prod_type = 40`）；时间口径同 BB-001：口语「竣工」→ **`open_date`**。本指标度量为 **`SUM(jz_points)`**，勿与 BB-001 的 `COUNT(serv_id)` 混用。
 
 ## 技术口径（SQL）
 
