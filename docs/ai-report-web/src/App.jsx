@@ -43,21 +43,21 @@ const painPoints = [
 
 const flowSteps = [
   ["01", "需求拆解与澄清", "识别查什么、查谁、时间口径、结果形式和限制条件"],
-  ["02", "指标命中与主表选择", "命中 M-BASIC-BB-001，定位 069 全业务资料月表"],
-  ["03", "业务口径确认", "确认普通宽带、新用户、prod_type=40 和 open_date"],
-  ["04", "字段映射", "映射分局、营服、揽装人、揽装局向、服务标识等字段"],
-  ["05", "补表规划", "按 069 表文档和 FIELD_BACKFILL 补 113 经营主体"],
-  ["06", "CTAS 生成与编排", "按规则生成单步或多步 CTAS，复杂跟踪走 TMP01-TMP04"],
-  ["07", "审计与自检交付", "输出字段来源、口径来源、JOIN 风险、血缘和自检 SQL"],
+  ["02", "主表选择", "根据业务事实、指标口径和表路由规则判断 CDAP 主表"],
+  ["03", "业务口径确认", "确认指标定义、时间字段、状态条件、过滤口径和默认假设"],
+  ["04", "字段映射", "把业务字段映射到主表字段，识别名称、编码、维度缺口"],
+  ["05", "补表规划", "当主表字段不足时，判断补表路径、JOIN 键、粒度和行数风险"],
+  ["06", "SQL生成与审计", "根据已确认要素生成 Hive SQL，并输出字段来源和风险提示"],
+  ["07", "自检SQL输出", "同步给出样例、量级、空分区、JOIN 放大等自检 SQL"],
 ];
 
 const knowledgeAssets = [
-  ["TABLE_INDEX", "定位 069 月表", "识别近半年外需求应使用 dwm_yz_tb_comm_cm_all_mon_final"],
-  ["ROUTING", "主表路由", "把主宽入网与后续出账都路由到 069 全业务资料月表"],
-  ["METRIC_INDEX", "命中 M-BASIC-BB-001", "锁定 kd_desc、is_new_user、prod_type 和 open_date 时间口径"],
-  ["FIELD_BACKFILL", "固定补 113", "经营主体按 channel_nbr 关联 113 揽装所属月表并去重"],
-  ["RULES", "CTAS 规则", "按 drop table、create table as、ORC Snappy 和验收 SQL 输出"],
-  ["verified-cases", "案例沉淀", "把 WITH 到 CTAS 的方案修正过程沉淀为可复用模板"],
+  ["表路由入口", "104 张表索引", "覆盖 CDAP 主表、维表、补充表等业务取数入口"],
+  ["字段资产", "103 个表文档", "沉淀字段说明、分区、粒度、适用场景和补表指引"],
+  ["指标口径", "90 个指标口径", "沉淀标准指标到技术条件、时间口径和过滤规则的映射"],
+  ["专项链路", "10 个专项场景", "沉淀复杂取数链路、风险审计和自检要求"],
+  ["验证沉淀", "18 个验证案例", "沉淀已验证的表选择、字段映射和 SQL 编排模板"],
+  ["交付规范", "SQL规则体系", "覆盖 CTAS、JOIN、分区、审计、自检 SQL 等交付规则"],
 ];
 
 const appScenarios = [
@@ -88,10 +88,10 @@ const appScenarios = [
 ];
 
 const valueCards = [
-  ["流水线交付", "4步 CTAS", "队列、补表、明细、汇总分层落盘，便于复核"],
-  ["需求澄清时间", "30%+", "自动收口入网月份、跟踪窗口、出账字段和经营主体"],
-  ["中间结果复跑", "可验证", "每步都有验收 SQL，可单独检查量级和 JOIN 放大"],
-  ["交付可信度", "持续提升", "统一主表、口径、字段补表和审计说明"],
+  ["SQL 初稿效率", "50%+", "常规 SQL 初稿从小时级压缩到分钟级"],
+  ["需求澄清时间", "30%+", "自动收口关键条件，减少低效往返沟通"],
+  ["新人上手周期", "明显缩短", "把熟手经验沉淀成可执行技能流程"],
+  ["口径偏差", "持续减少", "统一主表、口径、字段补表和审计规则"],
 ];
 
 const sqlExample = `-- TMP01: 202505 主宽入网基础队列
@@ -260,12 +260,12 @@ export function App() {
           <div className="hero-workflow" aria-label="业务需求到SQL输出示意">
             <div className="demand-card">
               <span>业务自然语言需求</span>
-              <strong>202505 主宽入网出账跟踪</strong>
-              <small>分局、营服、揽装人、揽装局向、经营主体、T+1 到 T+12 出账</small>
+              <strong>查询本月重点业务指标并按组织维度汇总</strong>
+              <small>查询对象、时间口径、统计方式、输出字段和限制条件</small>
             </div>
             <div className="engine-card">
               <span>AI理解引擎</span>
-              <strong>口径命中 · 字段补表 · CTAS编排</strong>
+              <strong>需求拆解 · 主表路由 · 口径识别</strong>
               <div className="engine-rings" aria-hidden="true">
                 <i />
                 <i />
@@ -279,11 +279,12 @@ export function App() {
                 <span />
                 <small>Hive</small>
               </div>
-              <pre>{`TMP01  基础队列
-TMP02  经营主体补表
-TMP03  12个月出账明细
-TMP04  T+1~T+12打横汇总`}</pre>
-              <b>已生成CTAS流水线</b>
+              <pre>{`SELECT 组织维度, 指标口径,
+       COUNT(*) AS 业务量
+FROM   CDAP 标准主表
+WHERE  时间口径 = 本月
+GROUP BY 组织维度;`}</pre>
+              <b>已生成可审计SQL</b>
             </div>
           </div>
         </div>
@@ -318,8 +319,8 @@ TMP04  T+1~T+12打横汇总`}</pre>
         <div className="section-head">
           <span>02</span>
           <div>
-            <h2>智能生成流程：从需求到可审计 CTAS</h2>
-            <p>让 AI 按 write-query 技能真实流程完成需求澄清、口径确认、字段补表、CTAS 编排和审计交付。</p>
+            <h2>智能生成流程：从需求理解到SQL审计</h2>
+            <p>让 AI 按支撑人员真实取数逻辑，完成从需求理解、口径说明到 SQL 生成和结果校验的全过程辅助。</p>
           </div>
         </div>
         <div className="flow-line">
@@ -334,15 +335,15 @@ TMP04  T+1~T+12打横汇总`}</pre>
         <div className="architecture">
           <div>
             <span>AI技能流程</span>
-            <strong>需求澄清、方案确认、SQL审计</strong>
+            <strong>需求拆解、方案确认、SQL审计</strong>
           </div>
           <div>
             <span>业务知识库</span>
-            <strong>指标索引、表文档、字段补表</strong>
+            <strong>主表路由、指标口径、字段补表</strong>
           </div>
           <div>
             <span>SQL规则体系</span>
-            <strong>CTAS落盘、过程表血缘、自检SQL</strong>
+            <strong>生成规范、风险提示、自检机制</strong>
           </div>
         </div>
       </section>
@@ -352,7 +353,7 @@ TMP04  T+1~T+12打横汇总`}</pre>
           <span>03</span>
           <div>
             <h2>知识库资产：把经验变成规则</h2>
-            <p>在出账跟踪案例中，知识库把指标口径、字段补表和 CTAS 交付规范串成可执行路径。</p>
+            <p>真实技能资产围绕表索引、指标口径、字段补表、SQL 审计和验证案例组织，形成可量化、可复用的取数能力底座。</p>
           </div>
         </div>
         <div className="asset-grid">
@@ -479,7 +480,7 @@ TMP04  T+1~T+12打横汇总`}</pre>
           <span>06</span>
           <div>
             <h2>价值成效：赋能数据生产力</h2>
-            <p>从一次性脚本走向“知识库 + CTAS 流水线 + AI 协同修正”的标准化支撑模式。</p>
+            <p>从人工经验取数走向“知识库 + AI 协同驱动”的标准化支撑模式。</p>
           </div>
         </div>
         <div className="value-grid">
@@ -493,7 +494,7 @@ TMP04  T+1~T+12打横汇总`}</pre>
         </div>
         <div className="vision">
           <strong>我们的愿景</strong>
-          <p>让业务用自然语言提出复杂跟踪需求，也能获得可解释、可验证、可复跑的数据交付物。</p>
+          <p>让业务用自然语言即可获取可信数据，让数据真正服务业务，让决策更智能、更可靠、更高效。</p>
         </div>
       </section>
     </main>
