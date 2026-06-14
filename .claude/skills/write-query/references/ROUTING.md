@@ -102,11 +102,13 @@ runtime: true
 | 销售品发展量 | 订购 + 销售品互换 | 041 优惠订单表 | `action_id IN (1292, 6200)`，排除撤单作废 | 不要选专项产品清单 |
 | 销售品在档 / 有没有套餐 | 销售品存量 | 014 优惠资料表 | `serv_id + par_month_id + prod_offer_code`；名称 `prod_offer_name` | 「有没有」≠ 041 订购动作 |
 | 销售品参数 / 折扣 / 赠金 / 统付金额 | 销售品参数值 | 014 锁在档 → 107 补 `param_value`（号码清单可先 069 补 `serv_id`） | - | 主表路径 014；补表步骤见 `FIELD_BACKFILL.md` **§销售品参数值（107）** |
+| 移动主套餐名称 / 主套餐名称 | 移动主套餐维度 | 主表已有名称则直接取；否则补 019 移动主套餐维表 | 069 `cdma_disc_type = 019.cdma_disc_id`，输出 `cdma_disc_desc` | 不要误走 020 销售品维表；销售品 / offer 名称才走 020 |
 | 设备名称 / 设备类型 / 购买方式 / 机身号 / 设备数量 | 设备资源信息 | 附件或 069 补 `serv_id` → 119 设备资源关系表 | `serv_id`；输出 `mkt_res_name/res_type/property_type_name/eqpt_sn/mkt_res_num` | 同一 `serv_id` 可能多设备；不要误选 090 终端装维成本或 105/106 特性表 |
 | 终端自注册机型 / 终端制式 / 手机厂商 / IMEI / IMSI | 终端自注册信息 | 附件号码或 069 `acc_nbr` → 123 终端自注册清单 | `acc_nbr`；输出 `terminal_type/brand_type/factory/brand/register_time/imsi/imei1/imei2` | 与 119 设备资源不同；一号一行默认按 `register_time` 取最新 |
 | 新装 / 入网 | 新入网规模 | 069 全业务资料表 | `is_new_user=1`、`open_date`、`subs_id` | 宽带、移动、固话及其它产品入网量默认都走 069 |
 | 到达 / 在网 / 出账 | 存量状态 | 069 全业务资料表 | `is_cz`、`is_cancel_user`、`is_online_user` | 规模类口径；**用户说「状态」见下行** |
 | 状态 / 号码状态 / 用户状态 | 服务状态码 + 中文名 | 069 全业务资料表 | **`state`**（码值）；中文 **`dws_attr_value.attr_value_name`**（`attr_id='4000000201'`） | **默认字段是 `state`，不是 `is_cancel_user` 等**；交付需 **码值 + 中文名**；详见 `FIELD_BACKFILL.md`、`VC-20260520-002` |
+| VPN 群号 / 集团 VPN / 校园 VPN 号码 | VPN 群下移动号码 | 069 全业务资料表 | `vpn_value`；移动号码常加 `prod_type=30`，在网常加 `is_cancel_user=0` | VPN 群号由需求方给定，不沉淀具体群号；圈出 `serv_id/acc_nbr` 后可接销售品、收入、终端、积分等标签 |
 | 双线 / 互联网专线 / 组网专线 | 专线类双线号码 | 069 全业务资料表 | `prod_type2 IN (60,70,71)`；60=互联网专线，70/71=组网专线 | 双线速率可取 069 或 033 的 `speed_value`；月租按需补 033 `yz_cs` |
 | 揽装 / 销售员 | 销售员及所属机构 | 主表自带，缺名称再补维表 | `sales_code`、`sales_man_name`、`salestaff_subst_id` | 机构维表用 `org_id + levs` |
 | 客户经理 CRM 编码 / 11 开头 CRM 工号 | 号码当前揽装人 -> 员工账号 | 069 → 115 | `staff_account`（115） | 专项步骤见 **§专项场景索引**（SC-001） |
@@ -205,6 +207,7 @@ runtime: true
 | 移机进入网格 / 网格迁入宽带数 | 118 移机订单表 `dwd_yz_rpt_comm_ba_subs_move_final` | 069 全业务资料表补产品类型，限定主宽或其它产品范围 | 069 直接反推移机；040/041 订单表 | 迁入目标网格看 118 移机后 `cell_code`；迁入成立通常要求 `cell_code <> cell_code_last`；118 无产品类型时按 `serv_id + par_month_id` 回 069 限定 `prod_type=40 AND kd_desc='普通宽带'` |
 | 移动/宽带新装专项明细 | 001 移动新装清单；006 宽带新装清单 | 069 | 用专项表覆盖常规入网量口径 | 仅当用户明确要专项清单字段、专项报表字段或专项口径时使用 |
 | 到达 / 在网 / 出账规模 | 069 全业务资料表 | 标准指标文件指定表 | 新装清单、订单表 | 存量状态优先 069 |
+| VPN 群号 / 揽装网点编码圈定移动号码 | 069 全业务资料表 | 后续按字段缺口补 014/047/048/123 等 | 把具体 VPN 群号、学校网点编码或一次性项目写成固定场景 | 入口键分别是 `vpn_value`、`channel_nbr`；移动号码常加 `prod_type=30`，在网常加 `is_cancel_user=0`；圈出 `serv_id/acc_nbr` 后再接画像字段 |
 | 商企/政企入网量 | 069 全业务资料表 | 022 商企入网清单；036 政企移动入网清单 | 直接按客群名切专项表 | 问“量/规模”默认 069；明确要商企/政企专项清单字段时再用专项表 |
 | 双线数据 / 互联网专线 / 组网专线 | 069 全业务资料表 `dwm_yz_tb_comm_cm_all_final` | 033 双线全量清单补月租 `yz_cs`、双线专项字段；已补 033 时也可取 033 `speed_value` | 只因要双线速率就切到 033 | 双线定义看 069 `prod_type2 IN (60,70,71)`；速率 069/033 均可，按查询主路径选择 |
 | 群端 / 主从 AZ / A-B 端关系 | 用户附件种子表；附件只有群号/群端接入号、成员号码或子端接入号时先 069 补 `serv_id` | 120 产品关联关系表、121 业务关联关系表；必要时回 069 补另一端 `acc_nbr`，再接 047/117/048 收入 | 仅用 033 `grp_acc_nbr` 反推 CRM A/Z 关系 | 关系表支持双向使用：输入群端或主端服务后，用 `a_prod_inst_id -> z_prod_inst_id` 找同组子端服务；输入成员/子端服务后，用 `z_prod_inst_id -> a_prod_inst_id` 反查所属群端/主端服务。两张关系表需 `city_id='200'`，合并后先按 `a_prod_inst_id,z_prod_inst_id` 去重；不要默认按 `z_prod_inst_id` 排序就是业务 A/B 端，需输出明细或确认排序口径 |
@@ -259,6 +262,7 @@ runtime: true
 |----------|------|----------|
 | 销售品编码 / 名称 | 020 销售品维表 `dws_crm_cfguse.dws_offer` | `city_id=200` |
 | 产品名称 | 017 产品维表视图 `dws_product` | 必要时城市过滤 |
+| 移动主套餐名称 | 019 移动主套餐维表 `metadata_ods_day.md_ft_cdma_disc_config` | `cdma_disc_type = cdma_disc_id`，输出 `cdma_disc_desc` |
 | 县分 / 分局 / 营服 | 018 机构维表视图 `dwd_yz_dim_org` | `org_id` 关联；`levs=3/4` |
 | 状态 / 动作码值 | `D_experience/dictionaries/{field}.md` | 不 JOIN，直接查码值 |
 | 揽装网点 / 销售员 | 112；111；113；115 | 历史账期用 `_mon_final`；揽装人唯一键 `staff_id`；CRM 工号专项见 **§专项场景索引**（SC-001） |

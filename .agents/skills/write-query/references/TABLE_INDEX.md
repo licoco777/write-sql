@@ -50,7 +50,7 @@
 |016|字典维表视图|dws_crm_cfguse.dws_attr_SPEC|dws_crm_cfguse.dws_attr_SPEC|tables/016_字典维表视图.md|||-|-||
 |017|产品维表视图|dws_crm_cfguse.dws_product|dws_crm_cfguse.dws_product|tables/017_产品维表视图.md|||-|-||
 |018|机构维表视图|zone_gz_yz.dwd_yz_dim_org|zone_gz_yz.dwd_yz_dim_org|tables/018_机构维表视图.md|||-|-||
-|019|移动主套餐维表视图|metadata_ods_day.tb_dim_cdma_disc_type|metadata_ods_day.tb_dim_cdma_disc_type|tables/019_移动主套餐维表视图.md|||-|-||
+| 019 | 移动主套餐维表视图 | metadata_ods_day.md_ft_cdma_disc_config | metadata_ods_day.md_ft_cdma_disc_config | tables/019_移动主套餐维表视图.md | 移动主套餐 ID 维度 |  | 按 069 或其它移动事实表 `cdma_disc_type` 回填移动主套餐名称 `cdma_disc_desc` | 不要替代 020 销售品维表；主表已自带主套餐名称时不必补 |
 |020|销售品维表视图|dws_crm_cfguse.dws_offer|dws_crm_cfguse.dws_offer|tables/020_销售品维表视图.md|||-|-||
 | 079 | 地址维表 | zone_gz_yz.dwd_yz_addr_final | zone_gz_yz.dwd_yz_addr_final | tables/079_地址维表.md | 以 id 为地址粒度；grade 表示地址层级 |  | 地址 / 装机地址 / 指定地址层级相关取数；主业务表取 `serv_addr_id` 后统一转字符关联 `id`，装机地址默认 `grade=10`，目标层级按 `parentid` 或 `addr_id_*` 上卷后再关联目标 `grade` | 字段名相似但业务事实不在本表时不要选；不要把 `serv_addr_id` 默认强转 decimal |
 |022|商企入网清单|zone_gz_yz.ads_yz_shangqi_rw_list|zone_gz_yz.ads_yz_shangqi_rw_list|tables/022_商企入网清单.md||par_month_id|-|-||
