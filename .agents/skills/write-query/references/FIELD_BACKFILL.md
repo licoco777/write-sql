@@ -66,6 +66,7 @@ runtime: true
 | 订单编码 / 订单状态 / 受理时间 | `subs_id`、`subs_code`、`subs_stat_date`、`act_date` | 主表缺订单事实字段 | 040 全业务号码订单表 | 优先 `subs_id`；无 `subs_id` 再看 `serv_id` | 订单表可能一对多，需去重 |
 | 协销人 | 主表通常缺 | 主表无协销字段 | 040；不足再 042/043 协销表 | 按订单键或 `serv_id` 关联，必要时先去重 | 容易放大明细行 |
 | 揽装人 / 销售员 | `sales_id`、`sales_code`、`sales_name`、`sales_man_name`、`staff_id` | 主表缺姓名或工号不完整 | 111 揽装人维表；有效网点下有效揽装人用 113 揽装所属表 | 优先用 `staff_id` 关联；历史账期用 `_mon_final + par_month_id` | 先确认是揽装人、受理人还是协销人；`sales_code` 不唯一 |
+| 揽装人认领责任田 / 按揽装规则调整责任田 | 069 `sales_code`、当前 `grid_id/area_id/branch_id/subst_id` | 需要判断号码应按揽装人认领规则落入哪个责任田，或筛出当前责任田与认领责任田不一致号码 | 124 揽装人认领规则表；125 服务当前划小规则表 | `069.sales_code = 124.sales_code` 补目标责任田；`069.serv_id = 125.serv_id` 补当前 `subst_rule/grid_rule`；完整流程见 `SC-010` | `sales_code` 可能一对多；具体产品范围、机构排除、规则类型剔除需由需求确认 |
 | 客户经理 CRM 编码 / 11 开头 CRM 工号 | 069 `sales_code` | 号码清单补 CRM 工号 | 115 员工信息表 | → `SC-001` | 员工表历史多版本须去重 |
 | 合同网点下有效揽装人 / 实际工号数量 | 110 `channel_id` | 合同下有效揽装人 | 113 揽装所属月表 | → `SC-007` | 工号数量按 `staff_id` 去重 |
 | 网点有效性 / 揽装人有效性 | 网点/揽装人清单 | 无号码收入网点诊断 | 112、113、111 月表 | → `SC-007` | 113 缺记录须回查 112/111 |
@@ -156,6 +157,7 @@ left join summary_ods_day_city.rpt_comm_cm_msparam p
 | 市场化合同有效揽装人 / 无号码收入网点诊断 | `scenarios/SC-007_市场化合同有效揽装人.md` |
 | 117 实收 / 047 客户基本面·产数（附件·圈定·直查） | `scenarios/SC-009_047117收入实收查询.md` |
 | 种子 serv_id + 拆机前月产品规格/附属产品属性宽表 | `scenarios/SC-008_种子serv_id拆机前月属性宽表.md` |
+| 揽装人认领规则调整责任田 | `scenarios/SC-010_揽装人认领责任田调整.md` |
 
 ### 069 新装 / 到达 / 拆机场景要协销人
 
