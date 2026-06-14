@@ -11,6 +11,8 @@ description: Use when the user wants to沉淀,迭代,审计, or升级 CDAP/write
 
 默认工作方式：**逐案确认**。先分析一个案例，输出可沉淀内容和风险，等待用户确认；确认前不要改 `write-query` 文件。
 
+分析偏好：**优先抽象通用匹配规则，不沉淀过细案例链路**。先找案例里的“输入键 → 稳定表字段 → 中间对象 → 后续可接方向”，例如“身份证号 → 069.social_id → serv_id/acc_nbr/cust_id → 再接销售品/地址/设备/收入”。案例下游业务只作证据，不要把一次案例写成唯一场景规则。
+
 ## When Triggered
 
 Use this skill when the user asks to:
@@ -29,10 +31,11 @@ For each target case, follow this pipeline before proposing any edit:
 1. **读案例源文件**：定位用户原始需求、SQL 主体、附件/临时表、输出表、关键注释和异常写法。
 2. **还原用户会怎么问**：把工单 SQL 翻译成 1-3 条自然语言需求，不沿用脚本变量名或一次性项目名。
 3. **拆 SQL 事实**：提取业务对象、主事实表、补表、字段、JOIN、过滤、时间口径、分组粒度、去重方式、自检或核数逻辑。
-4. **查现有知识覆盖**：按需读取 `write-query` 资料，判断现有路由、表文档、补表、规则、场景或验证案例是否已经能处理。
-5. **做技能可实现性判断**：如果现有 `write-query` 能组合出正确 SQL，优先标记 `已覆盖不写入`，只说明实现路径、参数和旧 SQL 中不能照抄的写法。
-6. **判断沉淀价值**：仅对现有技能缺失的稳定知识，区分“直接沉淀 / 待核对 / 不沉淀 / 已覆盖不写入”。
-7. **输出待确认方案**：只给可复用知识和风险，不把完整工单 SQL 当作技能内容。
+4. **抽通用匹配路径**：把案例细节上卷为可复用链路：输入键（号码/身份证/客户编码/serv_id/地址/机构等）→ 稳定表字段 → 中间对象（serv_id/acc_nbr/cust_id/cust_nbr/org_id 等）→ 后续可接方向。不要默认把案例下游业务固化为场景。
+5. **查现有知识覆盖**：按需读取 `write-query` 资料，判断现有路由、表文档、补表、规则、场景或验证案例是否已经能处理。
+6. **做技能可实现性判断**：如果现有 `write-query` 能组合出正确 SQL，优先标记 `已覆盖不写入`，只说明实现路径、参数和旧 SQL 中不能照抄的写法。
+7. **判断沉淀价值**：仅对现有技能缺失的稳定匹配规则、找表规则、补表入口、业务口径或审计规则，区分“直接沉淀 / 待核对 / 不沉淀 / 已覆盖不写入”。
+8. **输出待确认方案**：只给可复用知识和风险，不把完整工单 SQL 当作技能内容。
 
 ## Grounding
 
@@ -67,6 +70,7 @@ Classify each extracted item before deciding where it belongs.
 
 Directly sediment only stable, reusable knowledge:
 
+- 通用匹配规则：输入键 → 表字段 → 可获得的中间对象 → 后续可接方向。
 - 主表路由：用户语言 / 业务场景 → primary fact table / “do not choose” trap.
 - 字段补表：missing field → 补表 → JOIN keys → required filters → row-count risk.
 - 业务口径：stable metric/action/status/time definition.
@@ -74,6 +78,8 @@ Directly sediment only stable, reusable knowledge:
 - 专项流程：repeated multi-step CTAS or attachment-driven flows.
 
 Do not sediment merely because a case has a common user phrasing, a useful example SQL, or requires combining several existing rules. Combination cost alone is not a sedimentation reason. Sediment only the missing stable rule that would change future correctness or routing confidence.
+
+When a case contains a concrete chain such as `身份证 + 客户名 → 069 → 销售品在档`, first test whether the reusable part is only the upstream match (`身份证 → 069.social_id → 服务对象`). If yes, sediment that general entry point only; leave the downstream sales product, project, school, customer, attr_id, or offer code as case evidence or parameters.
 
 ## Target File Decision Tree
 
@@ -133,6 +139,7 @@ For each case, respond in this exact shape:
 - 结论：已覆盖 / 部分覆盖 / 未覆盖
 
 五、沉淀等级
+- 通用匹配规则：
 - 直接沉淀：
 - 待核对后沉淀：
 - 不沉淀：
