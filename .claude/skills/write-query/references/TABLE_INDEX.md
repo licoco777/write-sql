@@ -144,3 +144,4 @@
 | 125 | 服务当前划小规则表 | dwd_yz_jyfx_serv_grid_final | dwd_yz_jyfx_serv_grid_final | tables/125_服务当前划小规则表.md | 服务当前划小/认领规则结果；以 `serv_id` 为核心 |  | 判断号码当前划分规则、认领规则，和 069 当前责任田字段一起审计责任田归属 | 不是号码资料底座；普通号码入网/到达仍以 069 为主 |
 | 126 | 客户联系人关系表 | dws_crm_cust.dws_cust_contact_info_rel | dws_crm_cust.dws_cust_contact_info_rel | tables/126_客户联系人关系表.md | 客户与联系人关系；同一 `cust_id` 可能多个 `contact_id` | city_id | 客户清单按 `cust_id` 回填联系人信息时，先由本表取 `contact_id` | 不是联系人明细表；联系人姓名和电话字段在 127 |
 | 127 | 联系人信息表 | dws_crm_cust.dws_contacts_info | dws_crm_cust.dws_contacts_info | tables/127_联系人信息表.md | 联系人明细；以 `PARTY_ID + contact_id` 关联为核心 | city_id | 回填联系人姓名、家庭电话、办公电话、手机、状态时间等联系人字段 | 不是客户主数据表；客户编码/客户名补全优先看 108 或主事实表自带字段 |
+| 128 | 产品实例当前表 | dws_crm_cust.dws_prod_inst | dws_crm_cust.dws_prod_inst | tables/128_产品实例当前表.md | CRM 产品实例当前资料；以 `prod_inst_id` 为服务实例核心键 | city_id | 按 `serv_id/prod_inst_id` 或 `acc_nbr/acc_num` 回填 CRM 原始报装地址 `address_desc` | 只存当前数据；标准装机地址/地址层级仍走 069 + 079 |
