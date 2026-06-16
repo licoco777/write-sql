@@ -107,6 +107,7 @@ runtime: true
 | 移动主套餐名称 / 主套餐名称 | 移动主套餐维度 | 主表已有名称则直接取；否则补 019 移动主套餐维表 | 069 `cdma_disc_type = 019.cdma_disc_id`，输出 `cdma_disc_desc` | 不要误走 020 销售品维表；销售品 / offer 名称才走 020 |
 | 设备名称 / 设备类型 / 购买方式 / 设备来源 / 机身号 / 设备数量 | 设备资源信息 | 附件或 069 补 `serv_id` → 119 设备资源关系表 | `serv_id`；输出 `mkt_res_name/res_type/property_type_name/eqpt_sn/mkt_res_num`；原始表 `property_type` 用字典 `4000000208` 翻译 | 同一 `serv_id` 可能多设备；默认优先 119 派生表，需要原始字段或历史时用 CRM 当前/历史原始表；不要误选 090 终端装维成本或 105/106 特性表 |
 | DP 编码 / 分线盒编码 / ONU 编码 / OBD 编码 / 主干编码 / LAN 交换机编号 / 交接箱编码 | 服务资源编码 | 附件或 069 补 `serv_id` → 129 服务资源表 | `serv_id = prod_inst_id`；输出 `dp_code/onu_code/obd_code/trunk_code/lan_code/box_code`；广州固定 `city_id='200'` | 与 119 设备资源不同；119 查设备名称、购买方式、机身号等，129 查线路/服务资源编码；历史回溯用 `_his` 并确认历史时间口径 |
+| 银行账户名称 / 户名 / 支付账户 / 开户银行 / 银行名称 | 服务实例支付账户与银行信息 | 附件或 069 补 `serv_id` → 131 → 132 → 133 → 134 | `serv_id/prod_inst_id -> acct_id -> pay_acct_id/ext_acct_id -> acct_owner_org_branch/bank_id` | `pay_acct_name` 是账户户名，不是银行名称；银行名称取 134.`bank_name`；多账户/多支付方案默认保留明细 |
 | 终端自注册机型 / 终端制式 / 手机厂商 / IMEI / IMSI | 终端自注册信息 | 附件号码或 069 `acc_nbr` → 123 终端自注册清单 | `acc_nbr`；输出 `terminal_type/brand_type/factory/brand/register_time/imsi/imei1/imei2` | 与 119 设备资源不同；一号一行默认按 `register_time` 取最新 |
 | 新装 / 入网 | 新入网规模 | 069 全业务资料表 | `is_new_user=1`、`open_date`、`subs_id` | 宽带、移动、固话及其它产品入网量默认都走 069 |
 | 到达 / 在网 / 出账 | 存量状态 | 069 全业务资料表 | `is_cz`、`is_cancel_user`、`is_online_user` | 规模类口径；**用户说「状态」见下行** |
@@ -210,6 +211,7 @@ runtime: true
 | 销售品参数 / 折扣 / 赠金 / 统付金额 | 014 优惠资料表（先锁在档销售品） | 069 补 `serv_id`；107 补 `param_value` | 041 优惠订单表；107 直接当主表 | 三步补表见 `FIELD_BACKFILL.md` **§销售品参数值（107）** |
 | 号码 / 服务清单补设备资源字段 | 用户附件种子表；附件只有号码时先 069 补 `serv_id` | 119 设备资源关系表 `ads_yz_prod_res_inst_rel_final`；需要原始字段/历史时用 `dws_crm_cust.dws_prod_res_inst_rel/_his` | 090 终端装维成本；105/106 特性资料表；040/041 订单表 | 设备名称、设备类型、购买方式、机身号、数量等字段在设备资源表；同一 `serv_id` 可能一对多，默认保留设备明细；原始表购买方式按 `property_type -> dws_attr_value(attr_id=4000000208)` 翻译 |
 | 号码 / 服务清单补服务资源编码 | 用户附件种子表；附件只有号码时先 069 补 `serv_id` | 129 服务资源表 `dws_crm_cust.dws_cust_serv_res`；历史回溯用 `dws_crm_cust.dws_cust_serv_res_his` | 119 设备资源关系表；090 终端装维成本；123 终端自注册清单 | DP、ONU、OBD、主干、LAN、交接箱等编码在服务资源表；按 `serv_id = prod_inst_id` 关联并限制 `city_id='200'`；历史表需确认时间口径 |
+| 号码 / 服务清单补银行账户和银行名称 | 用户附件种子表；附件只有号码时先 069 补 `serv_id` | 131 产品实例账户关系表；132 支付方案表；133 外部账户表；134 银行表 | 023 基础业务托收清单；110 结算账单表；收入/欠费表 | 服务实例支付账户链路为 `serv_id -> acct_id -> pay_acct_id -> ext_acct_id -> bank_id`；`pay_acct_name` 是账户户名，银行名称取 `bank_name`；多账户/多支付方案有放大风险 |
 | 号码清单补终端自注册信息 | 用户附件种子表；或先用 069 圈定号码 `acc_nbr` | 123 终端自注册清单 `summary_ods_day_szx.rpt_terminal_type_new` | 119 设备资源关系表；090 终端装维成本；105/106 特性资料表 | 终端自注册机型、终端制式、手机厂商、标准化机型、注册时间、IMSI/IMEI 等字段在终端自注册清单；一号一行默认按 `register_time desc, sys_time desc` 取最新 |
 | 客户实体映射 / 产权客户名称补编码 | 108 产权客户全量表 `dws_crm_cust.dws_customer` | 用户附件种子表 | 号码/服务事实表 | 用于按客户名称维护/更新客户信息、无编码时兜底补 `cust_number`；若需求是号码/服务明细并要客户名，优先用 069 或当前事实主表自带客户字段 |
 | 客户清单补联系人信息 | 用户附件客户清单 | 126 客户联系人关系表；127 联系人信息表 | 049 欠费日清单联系人字段；108 产权客户全量表 | 客户清单有 `cust_id` 时先补 `contact_id`，再按 `PARTY_ID + contact_id` 补 `contact_name/home_phone/office_phone/mobile_phone/status_date`；默认 `LEFT JOIN` 保留客户清单，未命中联系人置空 |
@@ -283,6 +285,7 @@ runtime: true
 | 状态 / 动作码值 | `D_experience/dictionaries/{field}.md` | 不 JOIN，直接查码值 |
 | 揽装网点 / 销售员 | 112；111；113；115 | 历史账期用 `_mon_final`；揽装人唯一键 `staff_id`；CRM 工号专项见 **§专项场景索引**（SC-001） |
 | 揽装人认领规则 / 责任田调整 | 124；125 | 按 `sales_code` 补目标责任田，按 `serv_id` 补当前划分规则；完整流程见 **§专项场景索引**（SC-010） |
+| 银行名称 / 开户银行 | 134 银行表 `dws_crm_cfguse.dws_tb_cm_bank` | 常用 `133.acct_owner_org_branch = 134.bank_id`；取 `bank_name`，不要用 133.`pay_acct_name` |
 
 ## 选表决策三问
 
