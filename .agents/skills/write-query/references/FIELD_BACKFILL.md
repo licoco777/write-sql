@@ -91,6 +91,8 @@ runtime: true
 | **IMSI / 号码 IMSI** | 069 `acc_nbr` | 号码清单导 IMSI | **105 特性资料表** | → `SC-005` | 勿走 114 国漫表 |
 | **附属产品属性 / 附属产品特性值** | 主表通常无 | 用户要附属产品 `attr_id` 特性码值；历史/拆机前某月 | **106 附属产品资料表**（`tables/106_附属产品资料表.md`） | 月表 `iodata_ods_month_city.rpt_comm_cm_subserv_mon`：`serv_id` + `par_month_id` + `par_corp_id='200'` + `attr_id` | 勿与 105 混用；历史必须用月表 |
 | **特性值中文名** | `attr_value1`（码值） | 输出产品规格或附属产品属性且要中文 | **`dws_crm_cfguse.dws_attr_value`** | `a.attr_id=b.attr_id` AND `a.attr_value1=b.attr_inner_value` AND `b.city_id='200'` → **`attr_value_name`** | 用 **`attr_inner_value`**，不是 `state` 的 `attr_value`；105/106 通用 |
+| **特性名称 / 特性规格名称** | `attr_id`、`attr_inner_cd` | 输出 `attr_id` 对应名称，或根据产品规格编码/附属产品编码反查可用特性 | **016 特性规格维表 `dws_crm_cfguse.dws_attr_spec`** | `a.attr_id = spec.attr_id` → `attr_name`；或 `spec.attr_inner_cd IN (...)` → `attr_id, attr_name` | 016 翻译的是特性本身；不要用来翻译 `attr_value1` 码值 |
+| **附属产品名称 / 按附属产品名称圈定 sub_prod_id** | 106 `sub_prod_id` | 用户按附属产品名称查询 106 附属产品特性，或需要输出附属产品名称/编码 | **130 附属产品配置表 `dwd_dim_all_config`** | `106.sub_prod_id = cfg.seq_value_id` AND `cfg.seq_id=12` AND `cfg.seq_type='sub_prod_id'`；按需过滤 `cfg.seq_name` | 130 只做配置筛选/翻译；事实明细仍以 106 为准；具体产品名、编码来自需求，不写死 |
 
 ## 销售品参数值（107）补表链路
 

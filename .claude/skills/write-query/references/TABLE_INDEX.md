@@ -47,7 +47,7 @@
 | 012 | 发展存量积分清单 | ads_yz_score_all_list | ads_yz_score_all_list | tables/012_发展存量积分清单.md | 积分类全量明细底表，含号码/服务/积分类型/客户/网格/积分字段 | par_month_id | 积分类全量明细、发展积分、存量积分，以及需要积分类型层级、号码、客户、网格、竣工时间、价值/激励积分及描述的取数 | 字段名相似但业务事实不在本表时不要选；明确专项指标/专项表口径时再看 007/081/082/091 |
 | 014 | 优惠资料表 | ads_yz_rpt_comm_cm_msdisc_final | ads_yz_rpt_comm_cm_msdisc_final；dwd_yz_rpt_comm_cm_msdisc_mon_final（月表/历史快照） | tables/014_优惠资料表.md | 销售品在档实例粒度 | par_month_id | 销售品存量、在档、有没有某套餐；历史账期/协议到期核查用月表 | 销售品订购/发展量动作用 041 |
 |015|字典表视图|dws_crm_cfguse.dws_attr_value|dws_crm_cfguse.dws_attr_value|tables/015_字典表视图.md|||-|-||
-|016|字典维表视图|dws_crm_cfguse.dws_attr_SPEC|dws_crm_cfguse.dws_attr_SPEC|tables/016_字典维表视图.md|||-|-||
+| 016 | 字典维表视图 / 特性规格维表 | dws_crm_cfguse.dws_attr_spec | dws_crm_cfguse.dws_attr_spec | tables/016_字典维表视图.md | 特性规格维度；以 `attr_id` 为核心 |  | 按 `attr_id` 补 `attr_name`；按 `attr_inner_cd` 从产品规格编码/附属产品编码反查 `attr_id, attr_name` | 不翻译 `attr_value1` 码值中文；特性值中文走 015 |
 |017|产品维表视图|dws_crm_cfguse.dws_product|dws_crm_cfguse.dws_product|tables/017_产品维表视图.md|||-|-||
 |018|机构维表视图|zone_gz_yz.dwd_yz_dim_org|zone_gz_yz.dwd_yz_dim_org|tables/018_机构维表视图.md|||-|-||
 | 019 | 移动主套餐维表视图 | metadata_ods_day.md_ft_cdma_disc_config | metadata_ods_day.md_ft_cdma_disc_config | tables/019_移动主套餐维表视图.md | 移动主套餐 ID 维度 |  | 按 069 或其它移动事实表 `cdma_disc_type` 回填移动主套餐名称 `cdma_disc_desc` | 不要替代 020 销售品维表；主表已自带主套餐名称时不必补 |
@@ -146,3 +146,4 @@
 | 127 | 联系人信息表 | dws_crm_cust.dws_contacts_info | dws_crm_cust.dws_contacts_info | tables/127_联系人信息表.md | 联系人明细；以 `PARTY_ID + contact_id` 关联为核心 | city_id | 回填联系人姓名、家庭电话、办公电话、手机、状态时间等联系人字段 | 不是客户主数据表；客户编码/客户名补全优先看 108 或主事实表自带字段 |
 | 128 | 产品实例当前表 | dws_crm_cust.dws_prod_inst | dws_crm_cust.dws_prod_inst | tables/128_产品实例当前表.md | CRM 产品实例当前资料；以 `prod_inst_id` 为服务实例核心键 | city_id | 按 `serv_id/prod_inst_id` 或 `acc_nbr/acc_num` 回填 CRM 原始报装地址 `address_desc` | 只存当前数据；标准装机地址/地址层级仍走 069 + 079 |
 | 129 | 服务资源表 | dws_crm_cust.dws_cust_serv_res | dws_crm_cust.dws_cust_serv_res；dws_crm_cust.dws_cust_serv_res_his（历史表） | tables/129_服务资源表.md | CRM 服务资源编码；以 `prod_inst_id` 为服务实例核心键 | city_id | 按 `serv_id/prod_inst_id` 回填 DP/ONU/OBD/主干/LAN/交接箱等服务资源编码 | 不要与 119 设备资源关系表混用；119 是设备名称、购买方式、机身号等设备资源，129 是线路/服务资源编码 |
+| 130 | 附属产品配置表 | dwd_dim_all_config | dwd_dim_all_config | tables/130_附属产品配置表.md | 配置项粒度；以 `seq_id + seq_type + seq_value_id/seq_name` 为核心 |  | 按附属产品名称/配置圈定 `sub_prod_id`，或给 106 附属产品资料补附属产品名称、编码 | 不替代 106 附属产品资料表；具体产品名和编码不硬编码 |
