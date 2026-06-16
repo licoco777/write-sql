@@ -70,7 +70,7 @@
 |036|政企移动入网清单报表|dwd_yz_zhengqi_yd_new_daily_list_end|dwd_yz_zhengqi_yd_new_daily_list_end|tables/036_政企移动入网清单报表.md||par_month_id|-|-||
 |039|欠不列预警清单|zone_gz_yz.ads_ys_qblyj_daily|zone_gz_yz.ads_ys_qblyj_daily|tables/039_欠不列预警清单.md|||-|-||
 |040|全业务号码订单表|zone_gz_yz.dwm_yz_rpt_comm_ba_subs_final|zone_gz_yz.dwm_yz_rpt_comm_ba_subs_final|tables/040_全业务号码订单表.md|||-|-||
-| 041 | 优惠订单表 | zone_gz_yz.dwm_yz_rpt_comm_ba_msdisc_final | dwm_yz_rpt_comm_ba_msdisc_final | tables/041_优惠订单表.md | 订单粒度（subs_id 唯一） |  | 销售品发展量、订购、互换等订单动作 | 销售品在档/存量用 014 |
+| 041 | 优惠订单表 | zone_gz_yz.dwm_yz_rpt_comm_ba_msdisc_final | dwm_yz_rpt_comm_ba_msdisc_final；dwm_yz_rpt_comm_ba_msdisc_mon_final（月表/历史归档） | tables/041_优惠订单表.md | 订单粒度（subs_id 唯一） | par_month_id（月表） | 销售品发展量、订购、互换等订单动作；历史月份订单用月表 | 当前表只放当前套餐订单及历史未归档订单；查历史月份不要只扫当前表；销售品在档/存量用 014 |
 |042|号码协销表|zone_gz_yz.dwd_yz_cm_obj_xx_final|zone_gz_yz.dwd_yz_cm_obj_xx_final|tables/042_号码协销表.md|||-|-||
 |043|订单协销表|zone_gz_yz.dwd_yz_ba_obj_xx_final|zone_gz_yz.dwd_yz_ba_obj_xx_final|tables/043_订单协销表.md|||-|-||
 | 047 | 最终版划小收入 | dwm_srhx_serv_list_mon | dwm_srhx_serv_list_mon_final | tables/047_最终版划小收入.md | 服务/月收入明细，可按 `cust_nbr` 汇总到客户级 | par_month_id | 划小收入、客户清单基本面/产数（`fee_fm_new`/`fee_cs`）；编排见 `scenarios/SC-009` | 不要用 069 费用字段替代；标准指标口径见 097/metrics |
