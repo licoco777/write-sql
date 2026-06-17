@@ -95,7 +95,7 @@
 |066|移动小业务退订清单|zone_gz_yz.ads_yz_all_ydxyw_TD_LIST|zone_gz_yz.ads_yz_all_ydxyw_TD_LIST|tables/066_移动小业务退订清单.md||par_month_id|-|-||
 |067|实名装维清单|zone_gz_yz.ads_yz_smzw_list|zone_gz_yz.ads_yz_smzw_list|tables/067_实名装维清单.md|||-|-||
 |068|燃气卫士到达清单|zone_gz_yz.ads_yz_rqws_list|zone_gz_yz.ads_yz_rqws_list|tables/068_燃气卫士到达清单.md||par_month_id|-|-||
-| 069 | 全业务资料表 | ads_yz_tb_comm_cm_all_final | dwm_yz_tb_comm_cm_all_final；dwm_yz_tb_comm_cm_all_mon_final | tables/069_全业务资料表.md | 以 serv_id 为服务粒度；账期/统计月份一般为 par_month_id | par_month_id | 入网/到达/在网/出账等全业务规模默认主表；近半年账期优先日表，更早历史走月表，重叠默认日表 | 订单动作用 040/041；收入用 047/048/117；勿用 069 费用字段替代收入明细 |
+| 069 | 全业务资料表 | ads_yz_tb_comm_cm_all_final | dwm_yz_tb_comm_cm_all_final；dwm_yz_tb_comm_cm_all_mon_final | tables/069_全业务资料表.md | 以 serv_id 为服务粒度；账期/统计月份一般为 par_month_id | par_month_id | 入网/到达/在网/出账等全业务规模默认主表；当前表保留最近 4 个月，更早历史走月表，月表缺最新月时才用日表补缺口 | 订单动作用 040/041；收入用 047/048/117；勿用 069 费用字段替代收入明细 |
 |070|小微场景化手工计列清单|zone_gz_yz.ads_yz_ict_all_cjhbb2024_sr_LIST|zone_gz_yz.ads_yz_ict_all_cjhbb2024_sr_LIST|tables/070_小微场景化手工计列清单.md||par_month_id|-|-||
 |073|存量未托收清单|zone_gz_yz.ads_yz_clts_change_list_mon|zone_gz_yz.ads_yz_clts_change_list_mon|tables/073_存量未托收清单.md|||-|-||
 |074|安全产品清单|zone_gz_yz.ADS_YZ_ACCP_NEW_LIST|zone_gz_yz.ADS_YZ_ACCP_NEW_LIST|tables/074_安全产品清单.md||par_month_id|-|-||
