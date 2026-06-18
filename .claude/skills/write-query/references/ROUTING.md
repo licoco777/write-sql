@@ -146,6 +146,7 @@ runtime: true
 | 欠费停机属性 / 欠停时间 / 首次欠停时间 | 服务产品规格属性时间 | 105 特性资料表 | `char_class='04' AND attr_id=98`；`serv_id` + `create_date`；默认取最早 `create_date` | 不是欠费金额/欠费余额；不要误选 049 欠费日清单 |
 | IMSI / 号码 IMSI | 号码产品规格属性 | 069 → 105 | `attr_id='200000103'` | 勿走 114 国漫表；专项见 **§专项场景索引**（SC-005） |
 | 附属产品属性 / 附属产品特性 | 附属产品特性值 | 106 附属产品资料表（**月表**取历史） | `serv_id` + `attr_id` + `attr_value1`；`sub_prod_id` 可带出；`par_corp_id='200'` | 月表 `rpt_comm_cm_subserv_mon`；日表 `rpt_comm_cm_subserv` 只在网；按附属产品名称圈定时补 130 |
+| 敏感客户黑名单 / 黑名单客户 / 是否黑名单 | 客户级/证件级黑名单 | 135 敏感客户黑名单表 | `special_type='1200'` + `status_cd='1000'`；`obj_type='1100'`=客户级，`obj_type='1500'`=证件级；默认取最新 `create_date` | 不要与 122 名单制管控清单混用；证件级需经 136 证件本地表→108 产权客户表才能得到 `cust_id` |
 | 特性名称 / 特性规格 / 根据编码查特性 ID | 特性规格维度 | 016 字典维表 / 特性规格维表 | `attr_id -> attr_name`；`attr_inner_cd -> attr_id, attr_name` | 不翻译 `attr_value1`；特性值中文名走 015 |
 | 竣工 | 订单状态=竣工 | 任意带 `subs_stat` 的订单表 | `subs_stat='301200'` | **默认作 `is_jg` 标记列输出，不进 WHERE**；过滤竣工与否要看用户意图 |
 | 撤单 / 作废 | 订单状态原因 | 任意带 `subs_stat_reason` 的订单表 | `subs_stat_reason IN ('1200','1300')` | **发展量统计必加 `COALESCE(subs_stat_reason,'-1') NOT IN ('1200','1300')` 排除** |
