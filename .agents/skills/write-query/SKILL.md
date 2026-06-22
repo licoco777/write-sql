@@ -99,7 +99,7 @@ description: 为 CDAP 电信业务数据分析平台编写、改写和审计 Hiv
 | Business Semantics / 口径确认 | 已锁主表 `references/tables/*.md`；命中标准指标时已读单指标文件 | 复杂编排 → `verified-cases/INDEX.md` |
 | Column Linking / 字段映射 | 已锁主表 `references/tables/*.md` | — |
 | Join Planning / 缺口补表 | **先**按主表表文档完成字段映射与补表指引；**仅对仍缺口字段**读 `FIELD_BACKFILL.md`、补表 `tables/*.md` | 命中专项 → `scenarios/SC-*.md`（完整补表步骤以 SC 为准） |
-| SQL Generation + Review | `references/RULES.md`、相关 `dictionaries/{field}.md` | 命中专项 → `scenarios/SC-*.md` 风险审计/自检；复杂 CTAS → `verified-cases/VC-20260520-001` |
+| SQL Generation + Review | `references/RULES.md`、相关 `references/D_experience/dictionaries/{field}.md` | 命中专项 → `scenarios/SC-*.md` 风险审计/自检；复杂 CTAS → `verified-cases/VC-20260520-001` |
 | Complex Scenario / 专项场景 | `references/scenarios/INDEX.md` → 命中 `SC-*.md` | 专项硬规则**只读 SC**，不回读 ROUTING/RULES/FIELD_BACKFILL 中的重复展开 |
 
 ## 运行时禁读

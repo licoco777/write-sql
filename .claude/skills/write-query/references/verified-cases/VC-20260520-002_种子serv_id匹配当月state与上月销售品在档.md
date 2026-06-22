@@ -44,31 +44,45 @@
 ## SQL 编排
 
 ```sql
-WITH last_month_offer AS (
-    SELECT serv_id, max(prod_offer_name) AS prod_offer_name
-    FROM ads_yz_rpt_comm_cm_msdisc_final
-    WHERE par_month_id = 202604
-      AND prod_offer_code = 'YD0202-556'
-    GROUP BY serv_id
-)
-SELECT
+drop table if exists tmp_seed_last_month_offer purge;
+create table tmp_seed_last_month_offer
+row format delimited fields terminated by '\u0001'
+stored as orc tblproperties('orc.compression'='snappy') as
+select
+    serv_id,
+    max(prod_offer_name) as prod_offer_name
+from ads_yz_rpt_comm_cm_msdisc_final
+where par_month_id = 202604
+  and prod_offer_code = 'YD0202-556'
+group by serv_id;
+
+drop table if exists tmp_seed_state_offer_tag purge;
+create table tmp_seed_state_offer_tag
+row format delimited fields terminated by '\u0001'
+stored as orc tblproperties('orc.compression'='snappy') as
+select
     s.serv_id,
-    cm.state AS state_code,
-    av.attr_value_name AS state_name,
-    CASE WHEN o.serv_id IS NOT NULL THEN 1 ELSE 0 END AS has_offer_last_month,
+    cm.state as state_code,
+    av.attr_value_name as state_name,
+    case when o.serv_id is not null then 1 else 0 end as has_offer_last_month,
     o.prod_offer_name
-FROM ads_zqzw_chaiji_sxf_20260517 s
-LEFT JOIN dwm_yz_tb_comm_cm_all_final cm
-    ON s.serv_id = cm.serv_id AND cm.par_month_id = 202605
-LEFT JOIN dws_crm_cfguse.dws_attr_value av
-    ON av.attr_id = '4000000201'
-   AND av.attr_value = cast(cm.state AS string)
-LEFT JOIN last_month_offer o ON s.serv_id = o.serv_id;
+from ads_zqzw_chaiji_sxf_20260517 s
+left join dwm_yz_tb_comm_cm_all_final cm
+    on s.serv_id = cm.serv_id
+   and cm.par_month_id = 202605
+left join dws_crm_cfguse.dws_attr_value av
+    on av.attr_id = '4000000201'
+   and av.attr_value = cast(cm.state as string)
+left join tmp_seed_last_month_offer o
+    on s.serv_id = o.serv_id;
+
+select count(*) as result_rows, count(distinct serv_id) as result_serv_cnt
+from tmp_seed_state_offer_tag;
 ```
 
 ### 注意
 
-- **过程表可追溯**：若需求方要改中间结果（如上月销售品范围），将 `WITH last_month_offer` 改为 `drop/create tmp_*` CTAS 再 JOIN，见 `VC-20260520-001` 与 `RULES.md`「SQL 编排模式」。
+- **过程表可追溯**：上月销售品范围先落 `tmp_seed_last_month_offer`，需求方要改中间结果时只重跑后续结果表。
 - 种子表驱动用 **LEFT JOIN**，保证清单内每个 `serv_id` 都有一行。
 - 014 一对多：务必子查询聚合后再 JOIN。
 - `serv_id` 类型不一致时对 JOIN 做 `cast`。

@@ -158,20 +158,7 @@ left join summary_ods_day_city.rpt_comm_cm_msparam p
 
 ## 常见场景
 
-复杂场景的完整流程放在 `scenarios/`。本节只保留通用补表提醒；命中下列需求时优先读对应 `SC-*.md`，不要在本文件里展开完整步骤。
-
-| 场景 | 读取 |
-|---|---|
-| 客户经理 CRM 编码 / 11 开头工号 | `scenarios/SC-001_客户经理CRM编码.md` |
-| 国际漫游开通权限 | `scenarios/SC-002_国际漫游开通权限.md` |
-| 固话使用记录 | `scenarios/SC-003_固话使用记录.md` |
-| 投诉号码匹配移机订单 | `scenarios/SC-004_投诉号码匹配移机订单.md` |
-| 号码清单导 IMSI | `scenarios/SC-005_号码清单导IMSI.md` |
-| 号码清单补指定地址层级 | `scenarios/SC-006_号码清单补地址层级.md` |
-| 市场化合同有效揽装人 / 无号码收入网点诊断 | `scenarios/SC-007_市场化合同有效揽装人.md` |
-| 117 实收 / 047 客户基本面·产数（附件·圈定·直查） | `scenarios/SC-009_047117收入实收查询.md` |
-| 种子 serv_id + 拆机前月产品规格/附属产品属性宽表 | `scenarios/SC-008_种子serv_id拆机前月属性宽表.md` |
-| 揽装人认领规则调整责任田 | `scenarios/SC-010_揽装人认领责任田调整.md` |
+复杂场景的完整流程放在 `scenarios/`，唯一索引是 `scenarios/INDEX.md`。命中附件驱动、跨表编排或专项诊断时，先读 `scenarios/INDEX.md`，再只打开命中的 `SC-*.md`；本文件只保留通用补表提醒，不重复维护 SC 清单和完整步骤。
 
 ### 069 新装 / 到达 / 拆机场景要协销人
 
