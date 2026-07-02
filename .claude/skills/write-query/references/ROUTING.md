@@ -187,6 +187,7 @@ runtime: true
 | 订单编码 | `subs_id` / `subs_code` | 040 订单表 |
 | 销售品编码 | `prod_offer_code` | 020 销售品维表（`city_id=200`） |
 | 销售品名称 | `offer_name` 或 `prod_offer_name` | 020 维表 / 014 资料表 |
+| 业务产品类型 | `prod_type_yw`（产品类型打标） | 101 台阶收入清单；非 `prod_type`（原始产品类型） |
 
 ## 主表路由表
 
